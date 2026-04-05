@@ -7,22 +7,39 @@
   "bin": {
     "loforger": "./dist/index.js"
   },
+  "files": [
+    "dist",
+    "templates",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "node node_modules/typescript/bin/tsc && chmod +x dist/index.js",
     "dev": "node node_modules/typescript/bin/tsc --watch",
     "test": "node node_modules/vitest/vitest.mjs --run",
-    "lint": "node node_modules/@biomejs/biome/bin/biome check src/"
+    "lint": "node node_modules/@biomejs/biome/bin/biome check src/",
+    "prepublishOnly": "npm run build && npm test"
   },
   "keywords": [
     "cli",
     "scaffold",
     "generator",
-    "ink",
+    "boilerplate",
+    "starter",
+    "template",
+    "nextjs",
     "react",
-    "terminal"
+    "typescript",
+    "ink",
+    "terminal",
+    "interactive"
   ],
-  "author": "",
+  "author": "Your Name <your.email@example.com>",
   "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "commander": "^11.1.0",
     "fs-extra": "^11.2.0",
