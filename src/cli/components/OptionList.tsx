@@ -8,6 +8,7 @@ interface OptionListProps {
 	type: "single" | "multi";
 	value: string | string[] | null;
 	onChange: (value: string | string[]) => void;
+	onBack?: () => void;
 }
 
 export const OptionList: React.FC<OptionListProps> = ({
@@ -15,6 +16,7 @@ export const OptionList: React.FC<OptionListProps> = ({
 	type,
 	value,
 	onChange,
+	onBack,
 }) => {
 	const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -42,6 +44,8 @@ export const OptionList: React.FC<OptionListProps> = ({
 			setSelectedIndex((prev) => Math.min(options.length - 1, prev + 1));
 		} else if (key.return) {
 			toggleOption(options[selectedIndex].value);
+		} else if (key.escape && onBack) {
+			onBack();
 		}
 	});
 

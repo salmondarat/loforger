@@ -148,6 +148,7 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 					presentation={currentQuestion}
 					value={currentValue ?? currentQuestion.resolvedDefault}
 					onChange={setCurrentValue}
+					onBack={handleBack}
 				/>
 			</Box>
 

@@ -8,12 +8,14 @@ interface QuestionCardProps {
 	presentation: QuestionPresentation;
 	value: AnswerValue;
 	onChange: (value: AnswerValue) => void;
+	onBack?: () => void;
 }
 
 export const QuestionCard: React.FC<QuestionCardProps> = ({
 	presentation,
 	value,
 	onChange,
+	onBack,
 }) => {
 	const { question, resolvedOptions, resolvedDefault } = presentation;
 
@@ -57,6 +59,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 						type={question.type === "multi" ? "multi" : "single"}
 						value={value as string | string[] | null}
 						onChange={onChange}
+						onBack={onBack}
 					/>
 				)}
 			</Box>
