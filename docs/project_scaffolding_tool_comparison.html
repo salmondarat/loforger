@@ -1,0 +1,130 @@
+
+<style>
+  .wrap { padding: 1rem 0; font-family: var(--font-sans); }
+  .section-label { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); letter-spacing: .06em; text-transform: uppercase; margin: 0 0 8px; }
+  .card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 12px; }
+  .card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .badge { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: var(--border-radius-md); }
+  .badge-go { background: var(--color-background-success); color: var(--color-text-success); }
+  .badge-maybe { background: var(--color-background-warning); color: var(--color-text-warning); }
+  .badge-later { background: var(--color-background-secondary); color: var(--color-text-secondary); }
+  .card-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+  .card-sub { font-size: 13px; color: var(--color-text-secondary); margin: 0 0 10px; line-height: 1.5; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .pro { background: var(--color-background-success); border-radius: 6px; padding: 6px 10px; font-size: 12px; color: var(--color-text-success); }
+  .con { background: var(--color-background-danger); border-radius: 6px; padding: 6px 10px; font-size: 12px; color: var(--color-text-danger); }
+  .label-sm { font-size: 11px; font-weight: 500; margin-bottom: 4px; }
+  .highlight { border: 2px solid var(--color-border-info); }
+  .rec-banner { background: var(--color-background-info); color: var(--color-text-info); font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: var(--border-radius-md); display: inline-block; margin-bottom: 8px; }
+  .divider { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 16px 0; }
+  .flow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .pill { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: var(--color-text-secondary); }
+  .arrow { color: var(--color-text-tertiary); font-size: 14px; }
+  .btn { background: transparent; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 6px 14px; font-size: 13px; cursor: pointer; color: var(--color-text-primary); margin-top: 10px; }
+  .btn:hover { background: var(--color-background-secondary); }
+</style>
+<div class="wrap">
+  <p class="section-label">Output produk — pilih satu</p>
+
+  <div class="card highlight">
+    <div class="rec-banner">Rekomendasi utama</div>
+    <div class="card-head">
+      <span class="badge badge-go">Mulai di sini</span>
+      <span class="card-title">Loforger — Claude Code Plugin</span>
+    </div>
+    <p class="card-sub">User ketik <code style="background:var(--color-background-secondary);padding:2px 6px;border-radius:4px;font-size:12px">/forge</code> di Claude Code → Loforger agent interaktif berjalan → folder + file dibuat otomatis. Distribusinya via plugin yang diinstall sekali. Cocok untuk vibe coders dan pro sekaligus.</p>
+    <div class="row">
+      <div>
+        <div class="label-sm" style="color:var(--color-text-success)">Kelebihan</div>
+        <div class="pro">Tidak perlu keluar dari Claude Code</div>
+        <div class="pro" style="margin-top:4px">UX natural seperti chat</div>
+        <div class="pro" style="margin-top:4px">Distribusi mudah via npm/npx</div>
+        <div class="pro" style="margin-top:4px">Context7 bisa diintegrasikan langsung</div>
+      </div>
+      <div>
+        <div class="label-sm" style="color:var(--color-text-danger)">Tantangan</div>
+        <div class="con">Perlu belajar MCP SDK</div>
+        <div class="con" style="margin-top:4px">Butuh Claude Code aktif di user</div>
+      </div>
+    </div>
+    <div class="flow">
+      <span class="pill">User: /forge</span>
+      <span class="arrow">→</span>
+      <span class="pill">Kuesioner interaktif</span>
+      <span class="arrow">→</span>
+      <span class="pill">Context7 fetch docs</span>
+      <span class="arrow">→</span>
+      <span class="pill">Generate folder + files</span>
+    </div>
+    <button class="btn" onclick="sendPrompt('Jelaskan lebih detail cara membuat Loforger plugin untuk Claude Code dan bagaimana arsitekturnya')">Jelaskan implementasinya ↗</button>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <span class="badge badge-maybe">Fase 2</span>
+      <span class="card-title">CLI Tool (standalone)</span>
+    </div>
+    <p class="card-sub">Tool terpisah diinstall via <code style="background:var(--color-background-secondary);padding:2px 6px;border-radius:4px;font-size:12px">npx create-scaffold</code> atau <code style="background:var(--color-background-secondary);padding:2px 6px;border-radius:4px;font-size:12px">npm i -g @craftly/forge</code>. Bisa dipakai siapapun tanpa Claude Code. Cocok untuk distribusi luas dan onboarding non-AI users.</p>
+    <div class="row">
+      <div>
+        <div class="label-sm" style="color:var(--color-text-success)">Kelebihan</div>
+        <div class="pro">Tidak bergantung Claude Code</div>
+        <div class="pro" style="margin-top:4px">Bisa dijual/dimonetisasi sendiri</div>
+        <div class="pro" style="margin-top:4px">Familiar bagi developer</div>
+      </div>
+      <div>
+        <div class="label-sm" style="color:var(--color-text-danger)">Tantangan</div>
+        <div class="con">UX kuesioner CLI lebih kaku</div>
+        <div class="con" style="margin-top:4px">Perlu distribusi + maintenance npm</div>
+      </div>
+    </div>
+    <button class="btn" onclick="sendPrompt('Bagaimana cara membangun CLI tool untuk scaffold ini menggunakan Node.js dan bagaimana cara distribusinya?')">Tanya lebih lanjut ↗</button>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <span class="badge badge-later">Opsional</span>
+      <span class="card-title">Web App / SaaS (Craftly)</span>
+    </div>
+    <p class="card-sub">Form web berbasis browser. User pilih opsi, klik generate, download zip project atau push ke GitHub. Bisa jadi upsell dari Flow dan produk lain di ekosistem Craftly.</p>
+    <div class="row">
+      <div>
+        <div class="label-sm" style="color:var(--color-text-success)">Kelebihan</div>
+        <div class="pro">UX paling accessible (no install)</div>
+        <div class="pro" style="margin-top:4px">Cocok untuk non-developer</div>
+      </div>
+      <div>
+        <div class="label-sm" style="color:var(--color-text-danger)">Tantangan</div>
+        <div class="con">Paling berat dari sisi development</div>
+        <div class="con" style="margin-top:4px">Butuh hosting + backend</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <p class="section-label">Arsitektur internal tools</p>
+
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title">Komponen utama yang perlu dibangun</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px;margin-top:4px">
+      <div style="background:var(--color-background-secondary);border-radius:8px;padding:10px">
+        <div style="font-size:13px;font-weight:500;margin-bottom:4px">Template DB</div>
+        <div style="font-size:12px;color:var(--color-text-secondary)">JSON/YAML templates per stack (Next.js+Supabase, NestJS+Prisma, dll)</div>
+      </div>
+      <div style="background:var(--color-background-secondary);border-radius:8px;padding:10px">
+        <div style="font-size:13px;font-weight:500;margin-bottom:4px">Questionnaire Engine</div>
+        <div style="font-size:12px;color:var(--color-text-secondary)">Logic tree pilihan: monorepo → frontend → backend → ORM → DB → CI/CD</div>
+      </div>
+      <div style="background:var(--color-background-secondary);border-radius:8px;padding:10px">
+        <div style="font-size:13px;font-weight:500;margin-bottom:4px">Context7 Layer</div>
+        <div style="font-size:12px;color:var(--color-text-secondary)">Fetch latest docs per library sebelum generate template</div>
+      </div>
+      <div style="background:var(--color-background-secondary);border-radius:8px;padding:10px">
+        <div style="font-size:13px;font-weight:500;margin-bottom:4px">File Generator</div>
+        <div style="font-size:12px;color:var(--color-text-secondary)">Render template → buat folder structure → tulis file ke disk</div>
+      </div>
+    </div>
+  </div>
+</div>

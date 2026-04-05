@@ -1,0 +1,42 @@
+{
+  "name": "loforger",
+  "version": "0.1.0",
+  "description": "Interactive CLI for scaffolding modern web projects",
+  "type": "module",
+  "main": "./dist/index.js",
+  "bin": {
+    "loforger": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc && chmod +x dist/index.js",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "lint": "biome check src/"
+  },
+  "keywords": [
+    "cli",
+    "scaffold",
+    "generator",
+    "ink",
+    "react",
+    "terminal"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.1.0",
+    "fs-extra": "^11.2.0",
+    "handlebars": "^4.7.8",
+    "ink": "^4.4.1",
+    "pastel": "^2.0.0",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.4.1",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
+  }
+}

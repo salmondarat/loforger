@@ -1,0 +1,353 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Stack Compatibility Engine — Rules Database",
+  "version": "1.0.0",
+  "description": "Semua rules untuk validasi kombinasi stack. Engine membaca ini dan mengevaluasi pilihan user sebelum generate.",
+
+  "severity_levels": {
+    "error": "Kombinasi tidak valid, agent HARUS memblokir dan minta user ganti pilihan",
+    "warning": "Kombinasi bisa jalan tapi tidak direkomendasikan, agent memberi penjelasan + tanya apakah user yakin",
+    "info": "Catatan penting, tidak menghalangi, hanya informasi"
+  },
+
+  "incompatible_pairs": [
+    {
+      "id": "lang-ts-dart",
+      "name": "TypeScript + Dart di project yang sama",
+      "stack_a": "language:typescript",
+      "stack_b": "language:dart",
+      "severity": "error",
+      "reason": "TypeScript dan Dart adalah dua language ekosistem yang terpisah. Tidak bisa dipakai bersamaan dalam satu project yang kohesif.",
+      "suggestion": "Pilih salah satu: TypeScript untuk web/Node.js, atau Dart jika target Flutter mobile.",
+      "exception": "Monorepo yang secara eksplisit memisahkan web (TS) dan mobile (Flutter) di apps/ yang berbeda. Jika itu yang dimaksud, pilih platform mobile-flutter TERPISAH."
+    },
+    {
+      "id": "nextjs-laravel-fullstack",
+      "name": "Next.js frontend + Laravel backend (fullstack confusion)",
+      "stack_a": "frontend.framework:nextjs",
+      "stack_b": "backend.framework:laravel",
+      "severity": "warning",
+      "reason": "Next.js sudah memiliki API Routes/Server Actions bawaan. Menambahkan Laravel sebagai backend terpisah menciptakan kompleksitas yang tidak perlu untuk mayoritas use case. Ini artinya kamu mengelola dua server, dua deployment, dan dua ekosistem yang berbeda bahasa.",
+      "suggestion": "Pilih salah satu pendekatan:\n1. Next.js saja (recommended) — gunakan API Routes/Server Actions untuk backend\n2. Laravel + Blade/Inertia.js — Laravel sebagai fullstack dengan Inertia jika mau Vue/React\n3. Laravel API + Next.js frontend — valid untuk tim besar, tapi perlu setup CORS, dua deployment, dua CI pipeline",
+      "exception": "Valid jika kamu sudah punya Laravel API yang existing dan ingin menambahkan Next.js sebagai frontend baru (gunakan Extend mode)"
+    },
+    {
+      "id": "nextjs-django-fullstack",
+      "name": "Next.js + Django dalam satu project baru",
+      "stack_a": "frontend.framework:nextjs",
+      "stack_b": "backend.framework:django",
+      "severity": "warning",
+      "reason": "Dua ekosistem berbeda (JavaScript + Python) dalam satu project baru meningkatkan overhead setup, CI/CD, dan developer onboarding.",
+      "suggestion": "Jika butuh AI/ML heavy backend, pertimbangkan FastAPI sebagai Python API service terpisah, dan Next.js untuk frontend. Tapi untuk MVP, gunakan Next.js saja dengan API Routes.",
+      "exception": "Valid untuk arsitektur microservice dengan tim yang memang terpisah per stack"
+    },
+    {
+      "id": "flutter-nextjs-conflict",
+      "name": "Flutter + Next.js (platform conflict)",
+      "stack_a": "frontend.framework:flutter",
+      "stack_b": "frontend.framework:nextjs",
+      "severity": "error",
+      "reason": "Flutter adalah framework mobile/desktop native, Next.js adalah framework web. Tidak bisa jadi frontend yang sama untuk satu platform.",
+      "suggestion": "Jika mau web + mobile:\n1. Next.js (web) + React Native (mobile) — satu bahasa TypeScript\n2. Flutter (mobile) + Next.js/Nuxt (web) — dua codebase terpisah di monorepo\n3. Flutter Web + Flutter Mobile — satu codebase Dart, tapi Flutter Web punya limitasi"
+    },
+    {
+      "id": "react-native-nextjs-confused",
+      "name": "React Native sebagai frontend web",
+      "stack_a": "frontend.framework:react-native",
+      "stack_b": "platform:web",
+      "severity": "warning",
+      "reason": "React Native tidak didesain untuk web-first. Jika target utama adalah web browser, gunakan Next.js atau Vite+React.",
+      "suggestion": "Gunakan React Native hanya jika target platform adalah iOS/Android. Untuk web, gunakan Next.js."
+    },
+    {
+      "id": "sqlite-production-highload",
+      "name": "SQLite di production mode dengan multi-user",
+      "stack_a": "database.primary:sqlite",
+      "stack_b": "mode:production",
+      "severity": "warning",
+      "reason": "SQLite tidak mendukung concurrent writes dengan baik dan tidak cocok untuk aplikasi multi-user production dengan write traffic tinggi.",
+      "suggestion": "Gunakan PostgreSQL (Supabase, Neon, Railway) untuk production. SQLite cocok untuk MVP, development lokal, atau aplikasi yang hanya punya satu writer (e.g., Turso untuk edge read-heavy).",
+      "exception": "SQLite via Turso (LibSQL) valid untuk production jika pakai replicated setup dan traffic lebih banyak read."
+    },
+    {
+      "id": "firebase-prisma",
+      "name": "Firebase Firestore + Prisma",
+      "stack_a": "database.primary:firestore",
+      "stack_b": "database.orm:prisma",
+      "severity": "error",
+      "reason": "Prisma adalah SQL ORM, tidak bisa dipakai dengan Firestore (NoSQL document database).",
+      "suggestion": "Untuk Firestore: gunakan Firebase SDK langsung atau library seperti typesafe-firestore.\nUntuk Prisma: gunakan PostgreSQL, MySQL, SQLite, atau CockroachDB."
+    },
+    {
+      "id": "mongodb-prisma",
+      "name": "MongoDB + Prisma (dengan catatan)",
+      "stack_a": "database.primary:mongodb",
+      "stack_b": "database.orm:prisma",
+      "severity": "info",
+      "reason": "Prisma mendukung MongoDB tapi dalam versi yang lebih terbatas. Fitur seperti relation cascade, raw query, dan beberapa migration features belum fully supported.",
+      "suggestion": "Ini valid dan bisa dipakai, tapi perlu tahu limitasinya. Alternatif: Mongoose (lebih mature untuk MongoDB + Node.js)."
+    },
+    {
+      "id": "nextauth-non-nextjs",
+      "name": "NextAuth di project non-Next.js",
+      "stack_a": "auth.provider:nextauth",
+      "stack_b": "frontend.framework:vite-react",
+      "severity": "error",
+      "reason": "NextAuth (Auth.js) dirancang khusus untuk Next.js. Meski Auth.js versi baru bisa dipakai di framework lain, setup-nya jauh lebih kompleks.",
+      "suggestion": "Untuk Vite+React tanpa Next.js:\n- Lucia Auth (self-hosted, TypeScript)\n- Better Auth (modern alternative)\n- Clerk (hosted, DX bagus)\n- Firebase Auth"
+    },
+    {
+      "id": "supabase-auth-non-supabase-db",
+      "name": "Supabase Auth tanpa Supabase database",
+      "stack_a": "auth.provider:supabase-auth",
+      "stack_b": "database.primary:postgresql",
+      "severity": "info",
+      "reason": "Supabase Auth bisa dipakai dengan database eksternal, tapi user table dan auth tables perlu disinkronkan secara manual. Setup lebih kompleks dari biasanya.",
+      "suggestion": "Jika pakai Supabase Auth, disarankan pakai Supabase sebagai database juga untuk DX terbaik. Atau switch ke Clerk/Better Auth yang lebih database-agnostic."
+    },
+    {
+      "id": "trpc-non-typescript",
+      "name": "tRPC di project non-TypeScript",
+      "stack_a": "backend.api_style:trpc",
+      "stack_b": "language:javascript",
+      "severity": "error",
+      "reason": "tRPC membutuhkan TypeScript untuk end-to-end type safety. Tanpa TypeScript, keunggulan utama tRPC hilang.",
+      "suggestion": "Gunakan REST atau GraphQL jika tidak pakai TypeScript. Atau switch ke TypeScript — ini salah satu alasan kuat untuk menggunakannya."
+    },
+    {
+      "id": "elysia-non-bun",
+      "name": "Elysia di runtime Node.js",
+      "stack_a": "backend.framework:elysia",
+      "stack_b": "runtime:nodejs",
+      "severity": "warning",
+      "reason": "Elysia dioptimasi untuk Bun runtime. Bisa jalan di Node.js tapi performa dan beberapa API tidak optimal.",
+      "suggestion": "Pakai Bun sebagai runtime jika mau pakai Elysia. Atau gunakan Fastify/Hono sebagai alternatif untuk Node.js."
+    },
+    {
+      "id": "nx-small-project",
+      "name": "Nx di project single-app kecil",
+      "stack_a": "workspace.type:nx",
+      "stack_b": "profile.complexity:minimal",
+      "severity": "warning",
+      "reason": "Nx punya learning curve yang cukup tinggi dan overhead konfigurasi yang besar. Untuk project kecil atau solo dev, ini overkill.",
+      "suggestion": "Untuk project kecil/MVP:\n- Single app saja\n- Turborepo jika benar-benar butuh monorepo (jauh lebih simpel dari Nx)"
+    },
+    {
+      "id": "redux-simple-app",
+      "name": "Redux Toolkit untuk app sederhana",
+      "stack_a": "frontend.state_management:redux-toolkit",
+      "stack_b": "profile.complexity:minimal",
+      "severity": "info",
+      "reason": "Redux Toolkit powerful tapi verbose untuk app yang tidak terlalu complex state-nya.",
+      "suggestion": "Untuk MVP atau app sederhana, Zustand atau Jotai lebih ringan. Redux Toolkit cocok jika state app sangat complex atau tim sudah familiar."
+    },
+    {
+      "id": "kubernetes-mvp",
+      "name": "Kubernetes di MVP mode",
+      "stack_a": "infra.containerization:kubernetes",
+      "stack_b": "mode:mvp",
+      "severity": "warning",
+      "reason": "Kubernetes sangat kompleks untuk disetup dan di-maintain solo atau tim kecil di fase awal.",
+      "suggestion": "Untuk MVP:\n- Vercel/Railway/Render untuk hosted deployment tanpa ops\n- Docker Compose untuk local development\n- Kubernetes hanya jika sudah punya ops team dan butuh autoscaling"
+    },
+    {
+      "id": "dart-nodejs-runtime",
+      "name": "Dart language dengan Node.js runtime",
+      "stack_a": "language:dart",
+      "stack_b": "runtime:nodejs",
+      "severity": "error",
+      "reason": "Dart tidak berjalan di atas Node.js runtime. Dart menggunakan Dart VM atau dikompilasi ke native.",
+      "suggestion": "Dart untuk Flutter → gunakan Dart VM / Flutter toolchain.\nUntuk web backend → gunakan TypeScript + Node.js atau Bun."
+    },
+    {
+      "id": "rust-nextjs-backend",
+      "name": "Rust + Next.js API Routes di project yang sama",
+      "stack_a": "language:rust",
+      "stack_b": "backend.framework:nextjs-api",
+      "severity": "info",
+      "reason": "Rust dan Next.js API Routes tidak bisa digabung dalam satu service — mereka runtime yang berbeda.",
+      "suggestion": "Opsi valid:\n1. Next.js API Routes saja (TypeScript)\n2. Rust sebagai separate microservice, Next.js memanggil via HTTP\n3. Next.js + WASM jika butuh Rust untuk komputasi berat di client/edge"
+    },
+    {
+      "id": "firebase-selfhost",
+      "name": "Firebase + self-hosted deployment",
+      "stack_a": "database.primary:firestore",
+      "stack_b": "infra.hosting:self-hosted",
+      "severity": "warning",
+      "reason": "Firebase adalah managed service Google Cloud — tidak bisa di-self-host. Deployment app-nya bisa ke self-hosted server, tapi Firebase services tetap bergantung ke Google Cloud.",
+      "suggestion": "Jika ingin full self-host termasuk database: gunakan Supabase self-hosted, PocketBase, atau Appwrite. Jika tidak masalah bergantung ke Google Cloud, Firebase tetap valid."
+    },
+    {
+      "id": "graphql-trpc-both",
+      "name": "GraphQL dan tRPC bersamaan",
+      "stack_a": "backend.api_style:graphql",
+      "stack_b": "backend.api_style:trpc",
+      "severity": "warning",
+      "reason": "Dua API layer yang berbeda untuk purpose yang sama (type-safe API) menambah kompleksitas tanpa manfaat jelas.",
+      "suggestion": "Pilih salah satu:\n- tRPC: lebih simpel, full TypeScript, cocok untuk fullstack Next.js\n- GraphQL: lebih fleksibel, cocok jika ada banyak consumer API yang berbeda (web, mobile, third party)"
+    }
+  ],
+
+  "recommended_combos": [
+    {
+      "id": "nextjs-supabase-saas",
+      "name": "Next.js SaaS Starter",
+      "description": "Stack terbaik untuk SaaS web modern — minimal ops, DX terbaik",
+      "tags": ["web", "saas", "typescript", "mvp", "production"],
+      "stack": [
+        "frontend.framework:nextjs",
+        "backend.framework:nextjs-api",
+        "database.primary:supabase",
+        "database.orm:prisma",
+        "auth.provider:supabase-auth",
+        "language:typescript",
+        "package_manager:pnpm",
+        "infra.hosting:vercel",
+        "tooling.linter:biome"
+      ],
+      "reason": "Satu ekosistem (Vercel+Supabase), TypeScript end-to-end, zero-config deployment, auth + database sudah terintegrasi"
+    },
+    {
+      "id": "nextjs-clerk-neon-saas",
+      "name": "Next.js + Clerk + Neon (SaaS premium DX)",
+      "description": "Auth terbaik (Clerk) + serverless PostgreSQL (Neon) + Drizzle yang ringan",
+      "tags": ["web", "saas", "typescript"],
+      "stack": [
+        "frontend.framework:nextjs",
+        "database.primary:neon",
+        "database.orm:drizzle",
+        "auth.provider:clerk",
+        "language:typescript",
+        "package_manager:pnpm",
+        "infra.hosting:vercel"
+      ],
+      "reason": "Clerk memberikan DX auth terbaik (UI bawaan, multi-tenant), Neon serverless Postgres hemat cost, Drizzle ringan dan type-safe"
+    },
+    {
+      "id": "nestjs-postgresql-prisma",
+      "name": "NestJS API + PostgreSQL",
+      "description": "Backend API yang scalable dan terstruktur",
+      "tags": ["api-only", "typescript", "production", "enterprise"],
+      "stack": [
+        "backend.framework:nestjs",
+        "database.primary:postgresql",
+        "database.orm:prisma",
+        "auth.provider:better-auth",
+        "language:typescript",
+        "package_manager:pnpm",
+        "infra.hosting:railway",
+        "infra.containerization:docker"
+      ],
+      "reason": "NestJS memberikan struktur modular yang konsisten, Prisma type-safe, Railway mudah untuk deploy PostgreSQL + Node.js bersamaan"
+    },
+    {
+      "id": "rn-expo-supabase",
+      "name": "React Native (Expo) + Supabase",
+      "description": "Mobile app cross-platform dengan backend serverless",
+      "tags": ["mobile", "typescript", "mvp"],
+      "stack": [
+        "frontend.framework:react-native",
+        "platform:mobile-rn",
+        "database.primary:supabase",
+        "auth.provider:supabase-auth",
+        "language:typescript",
+        "package_manager:npm"
+      ],
+      "reason": "Expo mempercepat React Native dev, Supabase memberikan auth + realtime + storage dalam satu platform"
+    },
+    {
+      "id": "flutter-supabase",
+      "name": "Flutter + Supabase",
+      "description": "Mobile app native performance dengan backend serverless",
+      "tags": ["mobile", "dart", "mvp"],
+      "stack": [
+        "frontend.framework:flutter",
+        "platform:mobile-flutter",
+        "database.primary:supabase",
+        "auth.provider:supabase-auth",
+        "language:dart"
+      ],
+      "reason": "Flutter punya performa native terbaik, Supabase punya Flutter SDK resmi yang well-maintained"
+    },
+    {
+      "id": "turborepo-nextjs-nestjs",
+      "name": "Turborepo Fullstack Monorepo",
+      "description": "Monorepo untuk tim yang butuh share code antara web dan API",
+      "tags": ["monorepo", "fullstack", "typescript", "production"],
+      "stack": [
+        "workspace.type:turborepo",
+        "frontend.framework:nextjs",
+        "backend.framework:nestjs",
+        "database.primary:postgresql",
+        "database.orm:prisma",
+        "language:typescript",
+        "package_manager:pnpm",
+        "infra.ci_cd:github-actions"
+      ],
+      "reason": "Turborepo caching mempercepat build, pnpm workspaces efisien, share types dan utilities antara apps jadi mudah"
+    },
+    {
+      "id": "fastapi-postgresql",
+      "name": "FastAPI + PostgreSQL (Python backend)",
+      "description": "Backend Python modern, cocok untuk AI/ML integration",
+      "tags": ["api-only", "python", "ai-ml"],
+      "stack": [
+        "backend.framework:fastapi",
+        "database.primary:postgresql",
+        "database.orm:sqlalchemy",
+        "language:python",
+        "package_manager:poetry",
+        "infra.hosting:railway",
+        "infra.containerization:docker"
+      ],
+      "reason": "FastAPI auto-generate OpenAPI docs, async support, type hints bawaan Python. Cocok untuk backend yang butuh ML libraries (scikit-learn, transformers, dll)"
+    },
+    {
+      "id": "pocketbase-mvp",
+      "name": "PocketBase MVP (ultra minimal)",
+      "description": "Single binary backend — cocok untuk prototype cepat atau solo project",
+      "tags": ["mvp", "fullstack", "minimal"],
+      "stack": [
+        "backend.framework:pocketbase",
+        "database.primary:sqlite",
+        "auth.provider:none",
+        "language:typescript",
+        "infra.hosting:flyio"
+      ],
+      "reason": "PocketBase adalah all-in-one backend (auth + database + storage + admin UI) dalam satu binary. Deploy ke Fly.io dalam hitungan menit. Ideal untuk prototype atau internal tools."
+    }
+  ],
+
+  "language_platform_matrix": {
+    "description": "Bahasa yang valid untuk setiap platform",
+    "rules": [
+      { "platform": "web", "valid_languages": ["typescript", "javascript", "python", "go", "rust", "java", "kotlin", "csharp", "ruby", "php"] },
+      { "platform": "mobile-rn", "valid_languages": ["typescript", "javascript"] },
+      { "platform": "mobile-flutter", "valid_languages": ["dart"] },
+      { "platform": "android", "valid_languages": ["kotlin", "java"] },
+      { "platform": "ios", "valid_languages": ["swift"] },
+      { "platform": "desktop-electron", "valid_languages": ["typescript", "javascript"] },
+      { "platform": "desktop-tauri", "valid_languages": ["typescript", "javascript", "rust"] },
+      { "platform": "cli", "valid_languages": ["typescript", "javascript", "go", "rust", "python"] }
+    ]
+  },
+
+  "mode_complexity_matrix": {
+    "description": "Fitur yang di-include/exclude per mode",
+    "mvp": {
+      "always_include": ["linter", "env_file", "readme", "basic_auth"],
+      "always_exclude": ["kubernetes", "full_cicd", "monitoring", "e2e_testing"],
+      "simplify": ["docker → skip docker, deploy langsung ke platform", "testing → hanya unit test minimal", "auth → hanya satu method"]
+    },
+    "production": {
+      "always_include": ["ci_cd", "docker", "env_validation", "monitoring", "error_boundaries", "rate_limiting", "readme", "security_headers"],
+      "always_exclude": [],
+      "enforce": ["typescript strict mode", "exhaustive error handling", "logging"]
+    },
+    "extend": {
+      "always_include": ["patch_existing_files", "migration_guide", "rollback_instructions"],
+      "always_exclude": ["recreate_existing_setup"],
+      "detect_first": ["package.json", "pyproject.toml", "go.mod", "pubspec.yaml"]
+    }
+  }
+}

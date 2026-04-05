@@ -1,0 +1,9 @@
+Komponen utama yang perlu dibangun
+Template DB
+JSON/YAML templates per stack (Next.js+Supabase, NestJS+Prisma, dll)
+Questionnaire Engine
+Logic tree pilihan: monorepo → frontend → backend → ORM → DB → CI/CD
+Context7 Layer
+Fetch latest docs per library sebelum generate template
+File Generator
+Render template → buat folder structure → tulis file ke disk

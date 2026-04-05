@@ -1,0 +1,14 @@
+Contoh flow user experience
+User membuka Claude Code di folder kosong, lalu mengetik:
+/forge
+Agent langsung bertanya secara conversational: "Mau bikin project apa? Monorepo atau single app?" → user jawab → "Frontend-nya pakai apa? Next.js, Vite, atau Remix?" → dan seterusnya. Di akhir, semua pilihan dikonfirmasi sebelum file ditulis. Hasilnya adalah project yang sudah siap dengan README.md, docker-compose.yml, .env.example, folder structure yang sesuai, dan konfigurasi CI/CD dasar.
+
+Soal Context7 — sangat tepat pilihannya
+Context7 dari Upstash memang dibuat persis untuk use case ini: memberikan LLM akses ke dokumentasi library terbaru tanpa harus di-hardcode ke dalam training data. Cara integrasinya adalah dengan menambahkan MCP server Context7 sebagai dependency di tools kamu, lalu setiap kali user memilih sebuah library, agent fetch konteks library tersebut sebelum menulis template. Ini mencegah masalah klasik di mana agent generate kode dengan API yang sudah deprecated.
+
+Langkah konkret untuk mulai
+Karena kamu bukan developer murni dan ingin bergerak cepat, urutan yang paling realistis adalah:
+Pertama, buat template database dalam format JSON terlebih dahulu — ini tidak butuh coding, cukup definisikan 5-10 stack populer yang paling sering kamu pakai sendiri. Ini jadi "dataset" yang akan dipakai agent.
+Kedua, bangun MCP server minimal menggunakan @anthropic-ai/mcp-sdk atau bisa request ke Claude Code untuk membantu scaffolding MCP server itu sendiri (meta, tapi valid).
+Ketiga, tambahkan Context7 integration setelah flow dasarnya jalan.
+Keempat, jika traksinya bagus, baru pertimbangkan membungkusnya jadi CLI standalone untuk distribusi yang lebih luas, atau bahkan web app sebagai bagian dari ekosistem Craftly.

@@ -1,0 +1,672 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Loforger Template Database Schema",
+  "version": "1.0.0",
+  "description": "Schema untuk menyimpan semua template project di Loforger. Setiap entry adalah satu 'preset' yang bisa dipakai langsung atau dikombinasikan.",
+
+  "definitions": {
+
+    "StackProfile": {
+      "description": "Identitas unik dari satu kombinasi stack",
+      "type": "object",
+      "required": ["id", "name", "mode", "platform"],
+      "properties": {
+        "id": { "type": "string", "description": "Unique slug, e.g. 'nextjs-supabase-prisma-mvp'" },
+        "name": { "type": "string", "description": "Nama human-readable, e.g. 'Next.js + Supabase SaaS Starter'" },
+        "description": { "type": "string" },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "e.g. ['saas', 'fullstack', 'typescript']"
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["mvp", "production", "extend"],
+          "description": "Project mode yang digunakan"
+        },
+        "platform": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["web", "mobile-rn", "mobile-flutter", "desktop-electron", "desktop-tauri", "android", "ios", "api-only", "cli", "browser-ext", "vscode-ext", "other"]
+          }
+        },
+        "complexity": {
+          "type": "string",
+          "enum": ["minimal", "standard", "full"],
+          "description": "minimal=MVP, standard=mid, full=production"
+        },
+        "verified": { "type": "boolean", "default": false },
+        "community_stars": { "type": "integer", "default": 0 },
+        "last_updated": { "type": "string", "format": "date" }
+      }
+    },
+
+    "TechStack": {
+      "description": "Semua pilihan teknologi yang digunakan dalam template ini",
+      "type": "object",
+      "properties": {
+        "workspace": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["single", "turborepo", "nx", "pnpm-workspaces", "yarn-workspaces", "polyrepo", "gradle", "lerna"]
+            },
+            "config": {
+              "type": "object",
+              "description": "Konfigurasi spesifik workspace, e.g. pipeline tasks untuk turborepo",
+              "additionalProperties": true
+            }
+          }
+        },
+        "language": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["typescript", "javascript", "python", "go", "rust", "java", "kotlin", "swift", "dart", "php", "ruby", "csharp"]
+          }
+        },
+        "runtime": {
+          "type": "string",
+          "enum": ["nodejs", "bun", "deno", "edge-cf", "edge-vercel", "python", "go", "rust", "jvm", "dotnet", "none"]
+        },
+        "package_manager": {
+          "type": "string",
+          "enum": ["pnpm", "npm", "yarn", "yarn-berry", "bun", "pip", "poetry", "go-modules", "cargo", "gradle", "maven", "spm", "pub", "composer", "bundler"]
+        },
+        "frontend": {
+          "type": "object",
+          "properties": {
+            "framework": {
+              "type": "string",
+              "enum": ["nextjs", "nuxt", "sveltekit", "remix", "astro", "vite-react", "vite-vue", "vite-solid", "angular", "qwik", "gatsby", "vanilla", "htmx", "react-native", "flutter", "none"]
+            },
+            "ui_library": {
+              "type": "string",
+              "enum": ["shadcn", "tailwind-only", "daisyui", "mui", "antd", "chakra", "mantine", "radix", "headless-ui", "primereact", "vuetify", "quasar", "nativewind", "none"]
+            },
+            "state_management": {
+              "type": "string",
+              "enum": ["zustand", "jotai", "tanstack-query", "redux-toolkit", "pinia", "recoil", "valtio", "swr", "xstate", "nanostores", "none"]
+            },
+            "styling": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["tailwind", "css-modules", "styled-components", "emotion", "sass", "vanilla-css", "uno-css"]
+              }
+            }
+          }
+        },
+        "backend": {
+          "type": "object",
+          "properties": {
+            "framework": {
+              "type": "string",
+              "enum": ["nextjs-api", "nestjs", "express", "fastify", "hono", "trpc", "elysia", "django", "fastapi", "flask", "laravel", "rails", "gin", "fiber", "axum", "spring-boot", "ktor", "supabase-baas", "firebase-baas", "appwrite", "pocketbase", "payload-cms", "none"]
+            },
+            "api_style": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["rest", "graphql", "trpc", "grpc", "websocket", "sse"]
+              }
+            }
+          }
+        },
+        "database": {
+          "type": "object",
+          "properties": {
+            "primary": {
+              "type": "string",
+              "enum": ["postgresql", "mysql", "mariadb", "sqlite", "cockroachdb", "planetscale", "neon", "turso", "mongodb", "firestore", "dynamodb", "upstash-redis", "redis", "cassandra", "faunadb", "supabase", "convex", "none"]
+            },
+            "secondary": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Cache, search, analytics store tambahan"
+            },
+            "orm": {
+              "type": "string",
+              "enum": ["prisma", "drizzle", "typeorm", "sequelize", "kysely", "sqlalchemy", "django-orm", "eloquent", "active-record", "gorm", "hibernate", "exposed", "none"]
+            },
+            "migrations": {
+              "type": "boolean",
+              "description": "Apakah setup migration script disertakan"
+            },
+            "seeder": {
+              "type": "boolean",
+              "description": "Apakah seed data disertakan"
+            }
+          }
+        },
+        "auth": {
+          "type": "object",
+          "properties": {
+            "provider": {
+              "type": "string",
+              "enum": ["supabase-auth", "nextauth", "clerk", "auth0", "firebase-auth", "lucia", "better-auth", "keycloak", "hanko", "workos", "kinde", "passport", "custom-jwt", "none"]
+            },
+            "methods": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["email-password", "magic-link", "oauth-google", "oauth-github", "oauth-discord", "oauth-apple", "passkey", "phone-otp", "sso-saml", "anonymous", "web3"]
+              }
+            },
+            "rbac": {
+              "type": "boolean",
+              "description": "Role-based access control included"
+            }
+          }
+        },
+        "infra": {
+          "type": "object",
+          "properties": {
+            "hosting": {
+              "type": "string",
+              "enum": ["vercel", "netlify", "railway", "render", "flyio", "aws", "gcp", "azure", "digitalocean", "hetzner", "cf-pages", "self-hosted", "none"]
+            },
+            "containerization": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["docker", "docker-compose", "kubernetes", "podman", "none"]
+              }
+            },
+            "ci_cd": {
+              "type": "string",
+              "enum": ["github-actions", "gitlab-ci", "circleci", "bitbucket-pipelines", "jenkins", "turborepo-cache", "none"]
+            }
+          }
+        },
+        "tooling": {
+          "type": "object",
+          "properties": {
+            "linter": {
+              "type": "string",
+              "enum": ["eslint-prettier", "biome", "oxlint", "ruff", "golint", "clippy", "none"]
+            },
+            "testing": {
+              "type": "object",
+              "properties": {
+                "unit": { "type": "string", "enum": ["vitest", "jest", "pytest", "go-test", "none"] },
+                "e2e": { "type": "string", "enum": ["playwright", "cypress", "none"] },
+                "component": { "type": "string", "enum": ["testing-library", "storybook", "none"] }
+              }
+            },
+            "monitoring": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["sentry", "posthog", "datadog", "grafana", "axiom", "betterstack", "opentelemetry", "none"]
+              }
+            }
+          }
+        },
+        "addons": {
+          "type": "object",
+          "properties": {
+            "payment": {
+              "type": "string",
+              "enum": ["stripe", "midtrans", "xendit", "paddle", "lemonsqueezy", "paypal", "none"]
+            },
+            "email": {
+              "type": "string",
+              "enum": ["resend", "sendgrid", "postmark", "mailgun", "nodemailer", "none"]
+            },
+            "file_storage": {
+              "type": "string",
+              "enum": ["r2", "s3", "supabase-storage", "uploadthing", "cloudinary", "vercel-blob", "none"]
+            },
+            "ai": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["vercel-ai-sdk", "openai", "anthropic", "langchain", "llamaindex", "ollama", "none"]
+              }
+            },
+            "search": {
+              "type": "string",
+              "enum": ["algolia", "typesense", "meilisearch", "elasticsearch", "pg-fulltext", "none"]
+            },
+            "queue": {
+              "type": "string",
+              "enum": ["bullmq", "trigger-dev", "inngest", "celery", "sidekiq", "none"]
+            }
+          }
+        }
+      }
+    },
+
+    "FolderStructure": {
+      "description": "Definisi struktur folder yang akan dibuat",
+      "type": "object",
+      "properties": {
+        "root_files": {
+          "type": "array",
+          "description": "File di root project",
+          "items": { "$ref": "#/definitions/FileEntry" }
+        },
+        "directories": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/DirectoryEntry" }
+        }
+      }
+    },
+
+    "FileEntry": {
+      "type": "object",
+      "required": ["path", "template"],
+      "properties": {
+        "path": { "type": "string", "description": "Relative path dari root, e.g. 'package.json'" },
+        "template": { "type": "string", "description": "ID template file yang digunakan, atau 'inline' jika content ada di sini" },
+        "content": { "type": "string", "description": "Inline content jika template=inline, bisa berisi {{placeholder}}" },
+        "condition": { "type": "string", "description": "Ekspresi kondisi, e.g. 'stack.auth.provider !== none'" },
+        "mode": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["mvp", "production", "extend"] },
+          "description": "Mode mana file ini disertakan. Kosong = semua mode"
+        }
+      }
+    },
+
+    "DirectoryEntry": {
+      "type": "object",
+      "required": ["path"],
+      "properties": {
+        "path": { "type": "string" },
+        "description": { "type": "string" },
+        "condition": { "type": "string" },
+        "files": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/FileEntry" }
+        },
+        "subdirectories": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/DirectoryEntry" }
+        }
+      }
+    },
+
+    "ModeConfig": {
+      "description": "Perbedaan konfigurasi per mode project",
+      "type": "object",
+      "properties": {
+        "mvp": {
+          "type": "object",
+          "description": "Mode minimal — cepat, langsung ke core",
+          "properties": {
+            "skip_features": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Feature yang dilewati di MVP mode, e.g. ['monitoring', 'ci_cd', 'docker', 'rbac']"
+            },
+            "simplified": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Feature yang disimplifikasi, e.g. ['auth: hanya email-password', 'db: sqlite instead of postgres']"
+            },
+            "code_style": {
+              "type": "string",
+              "enum": ["minimal", "standard"],
+              "default": "minimal",
+              "description": "Minimal = lebih sedikit abstraksi, langsung ke titik"
+            }
+          }
+        },
+        "production": {
+          "type": "object",
+          "description": "Mode full — semua best practices, security, observability",
+          "properties": {
+            "required_features": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Feature yang wajib ada di production mode, e.g. ['ci_cd', 'monitoring', 'docker', 'env-validation']"
+            },
+            "security_hardening": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "e.g. ['rate-limiting', 'helmet', 'cors-strict', 'input-sanitization', 'csp-headers']"
+            },
+            "code_style": {
+              "type": "string",
+              "enum": ["standard", "full"],
+              "default": "full"
+            }
+          }
+        },
+        "extend": {
+          "type": "object",
+          "description": "Mode tambah fitur ke project existing",
+          "properties": {
+            "detect_existing": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "File yang dicek untuk detect stack existing, e.g. ['package.json', 'pyproject.toml', 'go.mod']"
+            },
+            "patch_files": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "target": { "type": "string", "description": "File yang dimodifikasi, e.g. 'package.json'" },
+                  "operation": { "type": "string", "enum": ["append", "merge", "replace-section", "add-import"] },
+                  "content": { "type": "string" }
+                }
+              }
+            },
+            "new_files": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/FileEntry" }
+            },
+            "instructions": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Manual steps yang perlu dilakukan user setelah extend"
+            }
+          }
+        }
+      }
+    },
+
+    "ContextConfig": {
+      "description": "Konfigurasi untuk Context7 / library docs fetching",
+      "type": "object",
+      "properties": {
+        "libraries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "description": "Nama library, e.g. 'prisma'" },
+              "context7_id": { "type": "string", "description": "ID di Context7 registry, e.g. '/prisma/prisma'" },
+              "fetch_topics": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Topik spesifik yang perlu difetch, e.g. ['schema', 'migration', 'client-setup']"
+              },
+              "required_for_generation": { "type": "boolean", "default": true }
+            }
+          }
+        },
+        "fallback_docs_url": { "type": "string", "description": "URL fallback jika Context7 tidak available" }
+      }
+    },
+
+    "CompatibilityRules": {
+      "description": "Rules untuk compatibility engine (disimpan terpisah di file compatibility-rules.json)",
+      "type": "object",
+      "properties": {
+        "incompatible_pairs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "stack_a": { "type": "string" },
+              "stack_b": { "type": "string" },
+              "severity": { "type": "string", "enum": ["error", "warning", "info"] },
+              "reason": { "type": "string" },
+              "suggestion": { "type": "string" }
+            }
+          }
+        },
+        "recommended_combos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "stack": { "type": "array", "items": { "type": "string" } },
+              "reason": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "type": "object",
+  "description": "Root object — satu file bisa berisi satu atau banyak template",
+  "properties": {
+    "meta": {
+      "type": "object",
+      "properties": {
+        "schema_version": { "type": "string", "default": "1.0.0" },
+        "generated_by": { "type": "string" },
+        "last_updated": { "type": "string", "format": "date-time" }
+      }
+    },
+    "templates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["profile", "stack", "structure", "mode_config"],
+        "properties": {
+          "profile": { "$ref": "#/definitions/StackProfile" },
+          "stack": { "$ref": "#/definitions/TechStack" },
+          "structure": { "$ref": "#/definitions/FolderStructure" },
+          "mode_config": { "$ref": "#/definitions/ModeConfig" },
+          "context_config": { "$ref": "#/definitions/ContextConfig" }
+        }
+      }
+    }
+  },
+
+  "examples": [
+    {
+      "meta": {
+        "schema_version": "1.0.0",
+        "generated_by": "loforger",
+        "last_updated": "2026-04-02T00:00:00Z"
+      },
+      "templates": [
+        {
+          "profile": {
+            "id": "nextjs-supabase-prisma-mvp",
+            "name": "Next.js + Supabase SaaS MVP",
+            "description": "Starter cepat untuk SaaS web, auth built-in, PostgreSQL via Supabase",
+            "tags": ["saas", "fullstack", "typescript", "mvp"],
+            "mode": "mvp",
+            "platform": ["web"],
+            "complexity": "minimal",
+            "verified": true,
+            "community_stars": 0,
+            "last_updated": "2026-04-02"
+          },
+          "stack": {
+            "workspace": { "type": "single" },
+            "language": ["typescript"],
+            "runtime": "nodejs",
+            "package_manager": "pnpm",
+            "frontend": {
+              "framework": "nextjs",
+              "ui_library": "shadcn",
+              "state_management": "zustand",
+              "styling": ["tailwind"]
+            },
+            "backend": {
+              "framework": "nextjs-api",
+              "api_style": ["rest"]
+            },
+            "database": {
+              "primary": "supabase",
+              "orm": "prisma",
+              "migrations": true,
+              "seeder": true
+            },
+            "auth": {
+              "provider": "supabase-auth",
+              "methods": ["email-password", "oauth-google"],
+              "rbac": false
+            },
+            "infra": {
+              "hosting": "vercel",
+              "containerization": ["none"],
+              "ci_cd": "none"
+            },
+            "tooling": {
+              "linter": "biome",
+              "testing": { "unit": "vitest", "e2e": "none", "component": "none" },
+              "monitoring": ["sentry"]
+            },
+            "addons": {
+              "payment": "none",
+              "email": "resend",
+              "file_storage": "none",
+              "ai": ["none"],
+              "search": "none",
+              "queue": "none"
+            }
+          },
+          "structure": {
+            "root_files": [
+              { "path": "package.json", "template": "nextjs-package-json", "mode": [] },
+              { "path": "tsconfig.json", "template": "tsconfig-nextjs", "mode": [] },
+              { "path": "next.config.ts", "template": "next-config-base", "mode": [] },
+              { "path": ".env.example", "template": "env-example-supabase", "mode": [] },
+              { "path": ".env.local", "template": "env-local-empty", "mode": [] },
+              { "path": "biome.json", "template": "biome-config", "mode": [] },
+              { "path": "README.md", "template": "readme-nextjs-supabase", "mode": [] },
+              { "path": "docker-compose.yml", "template": "docker-compose-postgres-local", "mode": ["production"] }
+            ],
+            "directories": [
+              {
+                "path": "src/app",
+                "description": "Next.js App Router pages",
+                "files": [
+                  { "path": "layout.tsx", "template": "nextjs-root-layout" },
+                  { "path": "page.tsx", "template": "nextjs-landing-page" },
+                  { "path": "globals.css", "template": "tailwind-globals" }
+                ],
+                "subdirectories": [
+                  {
+                    "path": "src/app/(auth)",
+                    "description": "Auth route group",
+                    "condition": "stack.auth.provider !== 'none'",
+                    "files": [
+                      { "path": "login/page.tsx", "template": "nextjs-login-page-supabase" },
+                      { "path": "register/page.tsx", "template": "nextjs-register-page-supabase" },
+                      { "path": "callback/route.ts", "template": "supabase-auth-callback" }
+                    ]
+                  },
+                  {
+                    "path": "src/app/(dashboard)",
+                    "description": "Protected dashboard routes",
+                    "files": [
+                      { "path": "layout.tsx", "template": "dashboard-layout-protected" },
+                      { "path": "page.tsx", "template": "dashboard-home-page" }
+                    ]
+                  },
+                  {
+                    "path": "src/app/api",
+                    "description": "API route handlers",
+                    "files": [
+                      { "path": "health/route.ts", "template": "api-health-check" }
+                    ]
+                  }
+                ]
+              },
+              {
+                "path": "src/lib",
+                "description": "Shared utilities",
+                "files": [
+                  { "path": "supabase/client.ts", "template": "supabase-client" },
+                  { "path": "supabase/server.ts", "template": "supabase-server" },
+                  { "path": "supabase/middleware.ts", "template": "supabase-middleware" },
+                  { "path": "prisma/client.ts", "template": "prisma-client-singleton" },
+                  { "path": "utils.ts", "template": "lib-utils-cn" }
+                ]
+              },
+              {
+                "path": "src/components",
+                "files": [
+                  { "path": "ui/.gitkeep", "template": "inline", "content": "" },
+                  { "path": "providers.tsx", "template": "nextjs-providers" }
+                ]
+              },
+              {
+                "path": "src/types",
+                "files": [
+                  { "path": "index.ts", "template": "types-index" },
+                  { "path": "database.types.ts", "template": "supabase-generated-types-placeholder" }
+                ]
+              },
+              {
+                "path": "prisma",
+                "files": [
+                  { "path": "schema.prisma", "template": "prisma-schema-supabase" },
+                  { "path": "seed.ts", "template": "prisma-seed-basic", "mode": [] }
+                ]
+              },
+              {
+                "path": "public",
+                "files": [
+                  { "path": ".gitkeep", "template": "inline", "content": "" }
+                ]
+              },
+              {
+                "path": ".github/workflows",
+                "condition": "stack.infra.ci_cd !== 'none'",
+                "files": [
+                  { "path": "ci.yml", "template": "github-actions-nextjs", "mode": ["production"] }
+                ]
+              }
+            ]
+          },
+          "mode_config": {
+            "mvp": {
+              "skip_features": ["docker", "ci_cd", "e2e_testing", "monitoring"],
+              "simplified": [
+                "auth: hanya email-password, skip OAuth untuk iterasi awal",
+                "db: gunakan Supabase hosted, skip local postgres setup"
+              ],
+              "code_style": "minimal"
+            },
+            "production": {
+              "required_features": ["ci_cd", "monitoring", "docker", "env-validation", "error-boundaries"],
+              "security_hardening": ["rate-limiting", "csp-headers", "input-sanitization"],
+              "code_style": "full"
+            },
+            "extend": {
+              "detect_existing": ["package.json", "next.config.ts", "next.config.js"],
+              "patch_files": [],
+              "new_files": [],
+              "instructions": []
+            }
+          },
+          "context_config": {
+            "libraries": [
+              {
+                "name": "nextjs",
+                "context7_id": "/vercel/next.js",
+                "fetch_topics": ["app-router", "server-actions", "middleware", "api-routes"],
+                "required_for_generation": true
+              },
+              {
+                "name": "prisma",
+                "context7_id": "/prisma/prisma",
+                "fetch_topics": ["schema", "migration", "client-setup", "supabase-adapter"],
+                "required_for_generation": true
+              },
+              {
+                "name": "supabase",
+                "context7_id": "/supabase/supabase",
+                "fetch_topics": ["auth", "client-setup", "server-side-auth", "ssr"],
+                "required_for_generation": true
+              },
+              {
+                "name": "shadcn-ui",
+                "context7_id": "/shadcn-ui/ui",
+                "fetch_topics": ["installation", "components"],
+                "required_for_generation": false
+              }
+            ],
+            "fallback_docs_url": "https://nextjs.org/docs"
+          }
+        }
+      ]
+    }
+  ]
+}

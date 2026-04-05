@@ -1,0 +1,546 @@
+
+<style>
+*{box-sizing:border-box}
+.wrap{padding:1rem 0;font-family:var(--font-sans)}
+.progress-bar{height:3px;background:var(--color-border-tertiary);border-radius:2px;margin-bottom:16px}
+.progress-fill{height:100%;background:var(--color-text-info);border-radius:2px;transition:width .3s}
+.step-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.step-label{font-size:11px;color:var(--color-text-tertiary);font-weight:500;letter-spacing:.05em;text-transform:uppercase}
+.step-count{font-size:11px;color:var(--color-text-tertiary)}
+.question-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:16px 18px;margin-bottom:12px}
+.question-prompt{font-size:15px;font-weight:500;color:var(--color-text-primary);margin:0 0 4px}
+.question-hint{font-size:12px;color:var(--color-text-tertiary);margin:0 0 14px;line-height:1.5}
+.options-grid{display:grid;gap:6px}
+.opt{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);cursor:pointer;transition:all .12s;background:var(--color-background-primary)}
+.opt:hover{border-color:var(--color-border-secondary);background:var(--color-background-secondary)}
+.opt.selected{border-color:var(--color-border-info);background:var(--color-background-info)}
+.opt-radio{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--color-border-secondary);flex-shrink:0;margin-top:2px;transition:all .12s;display:flex;align-items:center;justify-content:center}
+.opt.selected .opt-radio{border-color:var(--color-text-info);background:var(--color-text-info)}
+.opt-dot{width:6px;height:6px;border-radius:50%;background:#fff;display:none}
+.opt.selected .opt-dot{display:block}
+.opt-checkbox{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--color-border-secondary);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center}
+.opt.selected .opt-checkbox{border-color:var(--color-text-info);background:var(--color-text-info)}
+.opt-check{font-size:9px;color:#fff;display:none;font-weight:700}
+.opt.selected .opt-check{display:block}
+.opt-content{flex:1;min-width:0}
+.opt-label{font-size:13px;font-weight:500;color:var(--color-text-primary);display:flex;align-items:center;gap:6px}
+.opt-desc{font-size:11px;color:var(--color-text-secondary);margin-top:1px;line-height:1.4}
+.badge{font-size:10px;font-weight:500;padding:1px 6px;border-radius:8px}
+.b-rec{background:var(--color-background-success);color:var(--color-text-success)}
+.b-pop{background:var(--color-background-info);color:var(--color-text-info)}
+.b-exp{background:var(--color-background-warning);color:var(--color-text-warning)}
+.b-leg{background:var(--color-background-secondary);color:var(--color-text-secondary)}
+.b-new{background:var(--color-background-danger);color:var(--color-text-danger)}
+.actions{display:flex;gap:8px;margin-top:12px;align-items:center}
+.btn-next{background:var(--color-text-primary);color:var(--color-background-primary);border:none;border-radius:var(--border-radius-md);padding:8px 18px;font-size:13px;font-weight:500;cursor:pointer;transition:opacity .12s}
+.btn-next:hover{opacity:.85}
+.btn-next:disabled{opacity:.35;cursor:not-allowed}
+.btn-back{background:transparent;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:8px 14px;font-size:13px;cursor:pointer;color:var(--color-text-secondary)}
+.btn-back:hover{background:var(--color-background-secondary)}
+.skip-btn{font-size:12px;color:var(--color-text-tertiary);background:none;border:none;cursor:pointer;padding:0;margin-left:auto}
+.skip-btn:hover{color:var(--color-text-secondary)}
+.compat-box{border-radius:var(--border-radius-md);padding:10px 12px;margin-bottom:8px;font-size:12px;line-height:1.5}
+.compat-error{background:var(--color-background-danger);border:0.5px solid var(--color-border-danger);color:var(--color-text-danger)}
+.compat-warning{background:var(--color-background-warning);border:0.5px solid var(--color-border-warning);color:var(--color-text-warning)}
+.compat-info{background:var(--color-background-info);border:0.5px solid var(--color-border-info);color:var(--color-text-info)}
+.compat-title{font-weight:500;margin-bottom:3px}
+.summary-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px;margin-bottom:10px}
+.summary-group{margin-bottom:10px}
+.summary-group-label{font-size:10px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px}
+.summary-row{display:flex;justify-content:space-between;padding:3px 0;font-size:12px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.summary-row:last-child{border-bottom:none}
+.summary-key{color:var(--color-text-secondary)}
+.summary-val{color:var(--color-text-primary);font-weight:500;max-width:60%;text-align:right}
+.flow-preview{margin-top:16px}
+.flow-step{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px;color:var(--color-text-secondary)}
+.flow-step.done{color:var(--color-text-success)}
+.flow-step.active{color:var(--color-text-primary);font-weight:500}
+.flow-step.upcoming{color:var(--color-text-tertiary)}
+.flow-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.fd-done{background:var(--color-text-success)}
+.fd-active{background:var(--color-text-primary)}
+.fd-upcoming{background:var(--color-border-secondary)}
+.fd-skipped{background:var(--color-border-tertiary)}
+.flow-step.skipped{color:var(--color-text-tertiary);text-decoration:line-through}
+.text-input{width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);outline:none}
+.text-input:focus{border-color:var(--color-border-primary)}
+.preset-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:16px}
+.preset-btn{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px;cursor:pointer;text-align:left;transition:all .12s}
+.preset-btn:hover{border-color:var(--color-border-secondary);background:var(--color-background-primary)}
+.preset-name{font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px}
+.preset-desc{font-size:11px;color:var(--color-text-tertiary)}
+</style>
+
+<div class="wrap">
+  <div id="preset-screen">
+    <p style="font-size:13px;font-weight:500;margin:0 0 10px">Mulai dari preset atau dari awal:</p>
+    <div class="preset-grid">
+      <button class="preset-btn" onclick="loadPreset('nextjs-supabase-mvp')">
+        <div class="preset-name">Next.js + Supabase MVP</div>
+        <div class="preset-desc">Web SaaS, TypeScript, Vercel</div>
+      </button>
+      <button class="preset-btn" onclick="loadPreset('nestjs-postgres-production')">
+        <div class="preset-name">NestJS + PostgreSQL Production</div>
+        <div class="preset-desc">API only, TypeScript, Railway</div>
+      </button>
+      <button class="preset-btn" onclick="loadPreset('flutter-supabase-mvp')">
+        <div class="preset-name">Flutter + Supabase MVP</div>
+        <div class="preset-desc">Mobile, Dart, BaaS</div>
+      </button>
+      <button class="preset-btn" onclick="loadPreset('turborepo-fullstack')">
+        <div class="preset-name">Turborepo Fullstack</div>
+        <div class="preset-desc">Monorepo, Next.js + NestJS</div>
+      </button>
+    </div>
+    <button class="btn-next" style="width:100%" onclick="startFresh()">Mulai dari awal (custom)</button>
+  </div>
+
+  <div id="main-screen" style="display:none">
+    <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+    <div class="step-meta">
+      <span class="step-label" id="group-label">—</span>
+      <span class="step-count" id="step-count">1 / ?</span>
+    </div>
+    <div id="compat-zone"></div>
+    <div class="question-card">
+      <p class="question-prompt" id="q-prompt">—</p>
+      <p class="question-hint" id="q-hint" style="display:none"></p>
+      <div id="q-options"></div>
+    </div>
+    <div class="actions">
+      <button class="btn-back" id="btn-back" onclick="goBack()">Kembali</button>
+      <button class="btn-next" id="btn-next" onclick="submitAnswer()">Lanjut</button>
+      <button class="skip-btn" id="btn-skip" onclick="skipQuestion()">Lewati</button>
+    </div>
+    <div class="flow-preview" id="flow-preview"></div>
+  </div>
+
+  <div id="summary-screen" style="display:none">
+    <div id="summary-compat"></div>
+    <div class="summary-card" id="summary-content"></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn-back" onclick="editSummary()">Edit pilihan</button>
+      <button class="btn-next" id="btn-generate" onclick="generateProject()" style="flex:1">Generate project</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {id:'mode',group:'Project mode',step:0,type:'single',prompt:'Kamu ingin melakukan apa?',hint:'Ini menentukan kompleksitas setup dan tools yang digunakan.',options:[
+    {value:'mvp',label:'MVP mode',desc:'Mulai dari nol, cepat, minimal config',badge:'rec'},
+    {value:'production',label:'Production mode',desc:'Full setup: CI/CD, monitoring, Docker',badge:'pop'},
+    {value:'extend',label:'Extend mode',desc:'Project sudah ada, ingin tambah fitur baru',badge:'pop'},
+  ]},
+  {id:'extend_feature',group:'Project mode',step:1,type:'single',prompt:'Fitur apa yang ingin ditambahkan?',skipIf:a=>a.mode!=='extend',options:[
+    {value:'add-auth',label:'Autentikasi (Auth)',desc:'Login, register, OAuth',badge:'pop'},
+    {value:'add-payments',label:'Payment',desc:'Stripe, Midtrans, Xendit',badge:'pop'},
+    {value:'add-api-layer',label:'API layer',desc:'REST/GraphQL ke project existing'},
+    {value:'add-notifications',label:'Notifikasi',desc:'Email, push, in-app'},
+    {value:'add-i18n',label:'Internasionalisasi (i18n)',desc:'Multi-bahasa'},
+    {value:'add-file-storage',label:'File storage',desc:'S3, R2, Supabase Storage'},
+    {value:'add-analytics',label:'Analytics',desc:'PostHog, Mixpanel'},
+    {value:'add-search',label:'Search',desc:'Algolia, Meilisearch'},
+    {value:'add-queue',label:'Background jobs / Queue',desc:'BullMQ, Trigger.dev'},
+    {value:'add-ai',label:'AI / LLM integration',desc:'OpenAI, Claude, Vercel AI SDK'},
+  ]},
+  {id:'project_name',group:'Project info',step:2,type:'text',prompt:'Nama project kamu apa?',hint:'Dipakai sebagai nama folder dan package.json.',skipIf:a=>a.mode==='extend',default:'my-app'},
+  {id:'platform',group:'Target platform',step:3,type:'single',prompt:'Target platform utama:',skipIf:a=>a.mode==='extend',options:[
+    {value:'web',label:'Web app',desc:'Browser-based, SSR atau SPA',badge:'pop'},
+    {value:'api-only',label:'API / Backend only',desc:'Headless backend',badge:'pop'},
+    {value:'mobile-rn',label:'Mobile — React Native',desc:'iOS + Android, TypeScript',badge:'pop'},
+    {value:'mobile-flutter',label:'Mobile — Flutter',desc:'iOS + Android, Dart',badge:'pop'},
+    {value:'android',label:'Android native',desc:'Kotlin + Jetpack Compose'},
+    {value:'ios',label:'iOS native',desc:'Swift + SwiftUI'},
+    {value:'desktop-electron',label:'Desktop — Electron',desc:'Windows/macOS/Linux'},
+    {value:'desktop-tauri',label:'Desktop — Tauri',desc:'Lebih ringan dari Electron'},
+    {value:'cli',label:'CLI tool',desc:'Terminal application'},
+  ]},
+  {id:'workspace',group:'Workspace structure',step:4,type:'single',prompt:'Struktur workspace:',skipIf:a=>a.mode==='extend'||['mobile-flutter','android','ios'].includes(a.platform),default:'single',options:a=>{
+    const opts=[{value:'single',label:'Single app',desc:'Satu folder, satu app',badge:'rec'}];
+    if(!['mobile-flutter','android','ios'].includes(a.platform)){
+      opts.push(
+        {value:'turborepo',label:'Turborepo monorepo',desc:'Build cache otomatis',badge:'rec'},
+        {value:'nx',label:'Nx monorepo',desc:'Enterprise-grade, code gen',badge:'pop'},
+        {value:'pnpm-workspaces',label:'pnpm workspaces',desc:'Minimal, manual',badge:'exp'},
+      );
+    }
+    opts.push({value:'polyrepo',label:'Polyrepo',desc:'Tiap service di repo terpisah'});
+    return opts;
+  }},
+  {id:'language',group:'Language & runtime',step:5,type:'single',prompt:'Bahasa pemrograman utama:',skipIf:a=>a.mode==='extend'||['mobile-flutter','android','ios'].includes(a.platform),default:'typescript',options:a=>{
+    if(['mobile-rn'].includes(a.platform))return[{value:'typescript',label:'TypeScript',badge:'rec'},{value:'javascript',label:'JavaScript'}];
+    return[
+      {value:'typescript',label:'TypeScript',desc:'Default untuk JS/TS project',badge:'rec'},
+      {value:'javascript',label:'JavaScript',desc:'Tanpa type system'},
+      {value:'python',label:'Python',desc:'FastAPI / Django'},
+      {value:'go',label:'Go',desc:'Gin / Fiber — performant'},
+      {value:'rust',label:'Rust',desc:'Axum — high performance'},
+      {value:'php',label:'PHP',desc:'Laravel ecosystem'},
+      {value:'ruby',label:'Ruby',desc:'Rails ecosystem'},
+      {value:'kotlin',label:'Kotlin',desc:'Ktor, modern JVM',badge:'exp'},
+      {value:'java',label:'Java',desc:'Spring Boot, enterprise'},
+    ];
+  }},
+  {id:'frontend_framework',group:'Frontend',step:6,type:'single',prompt:'Frontend framework:',skipIf:a=>a.mode==='extend'||a.platform==='api-only',options:a=>{
+    if(a.platform==='mobile-rn')return[{value:'rn-expo',label:'React Native + Expo',desc:'Managed workflow, DX terbaik',badge:'rec'},{value:'rn-bare',label:'React Native (bare)',desc:'Full control'}];
+    if(a.platform==='mobile-flutter')return[{value:'flutter',label:'Flutter',badge:'rec'}];
+    if(a.platform==='android')return[{value:'jetpack-compose',label:'Jetpack Compose',badge:'rec'},{value:'xml-views',label:'XML Views',badge:'leg'}];
+    if(a.platform==='ios')return[{value:'swiftui',label:'SwiftUI',badge:'rec'},{value:'uikit',label:'UIKit',badge:'leg'}];
+    if(a.language==='typescript'||a.language==='javascript')return[
+      {value:'nextjs',label:'Next.js',desc:'React, SSR + App Router',badge:'pop'},
+      {value:'nuxt',label:'Nuxt',desc:'Vue, SSR + SSG',badge:'pop'},
+      {value:'sveltekit',label:'SvelteKit',desc:'Svelte, kompilasi ringan',badge:'exp'},
+      {value:'remix',label:'Remix',desc:'React, web-first, loader',badge:'exp'},
+      {value:'astro',label:'Astro',desc:'Islands, konten statis optimal',badge:'exp'},
+      {value:'vite-react',label:'Vite + React',desc:'SPA murni',badge:'pop'},
+      {value:'vite-vue',label:'Vite + Vue',desc:'SPA Vue'},
+      {value:'htmx',label:'HTMX',desc:'Hypermedia, minimal JS'},
+      {value:'vanilla',label:'Vanilla JS',desc:'HTML + CSS + JS murni'},
+    ];
+    if(a.language==='php')return[{value:'laravel-blade',label:'Laravel Blade',badge:'rec'},{value:'laravel-inertia-react',label:'Laravel + Inertia.js + React',badge:'pop'},{value:'laravel-livewire',label:'Laravel Livewire'}];
+    return[{value:'none',label:'Tidak ada frontend'}];
+  }},
+  {id:'backend_framework',group:'Backend',step:7,type:'single',prompt:'Backend framework:',skipIf:a=>a.mode==='extend',options:a=>{
+    const isMobile=['mobile-rn','mobile-flutter','android','ios'].includes(a.platform);
+    if(isMobile)return[
+      {value:'supabase-baas',label:'Supabase',desc:'Auth + DB + Storage + Realtime',badge:'rec'},
+      {value:'firebase-baas',label:'Firebase',desc:'Google, Realtime DB',badge:'pop'},
+      {value:'appwrite',label:'Appwrite',desc:'Self-hostable BaaS'},
+      {value:'pocketbase',label:'PocketBase',desc:'Single binary, embedded',badge:'exp'},
+      {value:'custom-api',label:'Custom API terpisah',desc:'Backend sendiri via REST/GraphQL'},
+      {value:'none',label:'Tidak ada backend'},
+    ];
+    const isFW=a.frontend_framework;
+    if(a.language==='typescript'||a.language==='javascript')return[
+      {value:'nextjs-api',label:'Next.js API Routes',desc:'Built-in jika pakai Next.js',badge:isFW==='nextjs'?'rec':'pop'},
+      {value:'nestjs',label:'NestJS',desc:'TypeScript, modular, enterprise',badge:'pop'},
+      {value:'fastify',label:'Fastify',desc:'Node.js, cepat, schema validation',badge:'pop'},
+      {value:'hono',label:'Hono',desc:'Edge-first, ringan',badge:'exp'},
+      {value:'elysia',label:'Elysia',desc:'Bun-native, type-safe',badge:'exp'},
+      {value:'express',label:'Express.js',desc:'Minimal, klasik',badge:'leg'},
+      {value:'supabase-baas',label:'Supabase (BaaS)',desc:'Skip custom backend',badge:'rec'},
+      {value:'pocketbase',label:'PocketBase',desc:'Single binary all-in-one',badge:'exp'},
+      {value:'none',label:'Tidak ada backend'},
+    ];
+    if(a.language==='python')return[{value:'fastapi',label:'FastAPI',desc:'Async, OpenAPI auto-gen',badge:'rec'},{value:'django',label:'Django',desc:'Batteries-included',badge:'pop'},{value:'flask',label:'Flask',badge:'leg'}];
+    if(a.language==='go')return[{value:'gin',label:'Gin',badge:'pop'},{value:'fiber',label:'Fiber'},{value:'echo',label:'Echo'},{value:'chi',label:'Chi'}];
+    return[{value:'none',label:'Tidak ada backend'}];
+  }},
+  {id:'database',group:'Database',step:8,type:'single',prompt:'Database utama:',skipIf:a=>a.mode==='extend'||['supabase-baas','firebase-baas','appwrite','pocketbase','none'].includes(a.backend_framework),default:a=>a.mode==='mvp'?'sqlite':'postgresql',options:a=>[
+    {value:'postgresql',label:'PostgreSQL',desc:'Recommended, feature-rich',badge:'rec'},
+    {value:'sqlite',label:'SQLite',desc:'File-based, ideal MVP/dev lokal',badge:a.mode==='mvp'?'rec':undefined},
+    {value:'mysql',label:'MySQL',desc:'Widely hosted',badge:'pop'},
+    {value:'neon',label:'Neon',desc:'Serverless PostgreSQL',badge:'exp'},
+    {value:'turso',label:'Turso (LibSQL)',desc:'Edge SQLite, replicated',badge:'exp'},
+    {value:'planetscale',label:'PlanetScale',desc:'Serverless MySQL',badge:'exp'},
+    {value:'supabase',label:'Supabase PostgreSQL',desc:'Managed + realtime + auth',badge:'rec'},
+    {value:'mongodb',label:'MongoDB',desc:'Document, flexible schema',badge:'pop'},
+    {value:'convex',label:'Convex',desc:'Realtime reactive DB',badge:'exp'},
+  ]},
+  {id:'orm',group:'Database',step:9,type:'single',prompt:'ORM / Query builder:',skipIf:a=>a.mode==='extend'||['supabase-baas','firebase-baas','appwrite','pocketbase','none'].includes(a.backend_framework)||['redis','upstash-redis'].includes(a.database),default:a=>{
+    if(a.language==='python')return a.backend_framework==='django'?'django-orm':'sqlalchemy';
+    if(a.language==='go')return'gorm';if(a.language==='php')return'eloquent';
+    if(a.language==='ruby')return'active-record';return'prisma';
+  },options:a=>{
+    if(a.language==='python'){if(a.backend_framework==='django')return[{value:'django-orm',label:'Django ORM',badge:'rec'}];return[{value:'sqlalchemy',label:'SQLAlchemy',badge:'rec'},{value:'tortoise-orm',label:'Tortoise ORM',desc:'Async'},{value:'none',label:'Raw SQL'}];}
+    if(a.language==='go')return[{value:'gorm',label:'GORM',badge:'pop'},{value:'sqlx',label:'sqlx'},{value:'ent',label:'Ent',badge:'exp'},{value:'none',label:'database/sql (raw)'}];
+    if(a.language==='php')return[{value:'eloquent',label:'Eloquent (Laravel)',badge:'rec'},{value:'doctrine',label:'Doctrine'}];
+    if(a.database==='mongodb')return[{value:'mongoose',label:'Mongoose',badge:'rec'},{value:'prisma',label:'Prisma (MongoDB)',badge:'exp'},{value:'none',label:'MongoDB driver langsung'}];
+    return[{value:'prisma',label:'Prisma',desc:'TypeScript-first, DX terbaik',badge:'rec'},{value:'drizzle',label:'Drizzle ORM',desc:'Lightweight, SQL-like',badge:'exp'},{value:'typeorm',label:'TypeORM',desc:'Decorator-based',badge:'leg'},{value:'kysely',label:'Kysely',desc:'Type-safe query builder'},{value:'none',label:'Raw SQL'}];
+  }},
+  {id:'auth_provider',group:'Auth',step:10,type:'single',prompt:'Sistem autentikasi:',skipIf:a=>a.mode==='extend',default:a=>a.database==='supabase'||a.backend_framework==='supabase-baas'?'supabase-auth':a.frontend_framework==='nextjs'?'nextauth':'none',options:a=>[
+    {value:'supabase-auth',label:'Supabase Auth',desc:'Built-in jika pakai Supabase',badge:(a.database==='supabase'||a.backend_framework==='supabase-baas')?'rec':undefined},
+    {value:'clerk',label:'Clerk',desc:'Hosted UI + user management, DX terbaik',badge:'rec'},
+    {value:'nextauth',label:'Auth.js / NextAuth',desc:'Multi-provider, Next.js native',badge:a.frontend_framework==='nextjs'?'rec':'pop'},
+    {value:'better-auth',label:'Better Auth',desc:'Modern, TypeScript, self-hosted',badge:'exp'},
+    {value:'lucia',label:'Lucia Auth',desc:'Self-hosted, lightweight'},
+    {value:'firebase-auth',label:'Firebase Auth',desc:'Google ecosystem'},
+    {value:'auth0',label:'Auth0',desc:'Enterprise, managed',badge:'pop'},
+    {value:'custom-jwt',label:'Custom JWT',desc:'Build sendiri'},
+    {value:'none',label:'Tidak ada auth (public app)'},
+  ]},
+  {id:'hosting',group:'Infrastructure',step:11,type:'single',prompt:'Platform hosting:',skipIf:a=>a.mode==='extend'||['mobile-rn','mobile-flutter','android','ios'].includes(a.platform),default:a=>a.frontend_framework==='nextjs'?'vercel':a.language==='python'?'railway':'railway',options:a=>[
+    {value:'vercel',label:'Vercel',desc:'Next.js native, serverless',badge:a.frontend_framework==='nextjs'?'rec':'pop'},
+    {value:'railway',label:'Railway',desc:'Docker, DB, simple DevEx',badge:'rec'},
+    {value:'render',label:'Render',desc:'Auto-deploy, managed'},
+    {value:'flyio',label:'Fly.io',desc:'Container, global edge'},
+    {value:'netlify',label:'Netlify',desc:'Jamstack, serverless'},
+    {value:'digitalocean',label:'DigitalOcean',desc:'Affordable, managed'},
+    {value:'hetzner',label:'Hetzner VPS',desc:'Murah, EU, self-manage',badge:'exp'},
+    {value:'self-hosted',label:'Self-hosted VPS',desc:'Docker + Nginx manual'},
+    {value:'none',label:'Belum ditentukan'},
+  ]},
+  {id:'linter',group:'Tooling',step:12,type:'single',prompt:'Linter & formatter:',skipIf:a=>a.mode==='extend'||['mobile-flutter','android','ios'].includes(a.platform),default:a=>a.language==='python'?'ruff':a.language==='go'?'golangci-lint':a.language==='rust'?'clippy':'biome',options:a=>{
+    if(a.language==='python')return[{value:'ruff',label:'Ruff',desc:'Rust-based, sangat cepat',badge:'rec'},{value:'flake8-black',label:'Flake8 + Black',badge:'pop'}];
+    if(a.language==='go')return[{value:'golangci-lint',label:'golangci-lint',badge:'rec'}];
+    if(a.language==='rust')return[{value:'clippy',label:'Clippy + rustfmt',badge:'rec'}];
+    return[{value:'biome',label:'Biome',desc:'ESLint + Prettier replacement, cepat',badge:'rec'},{value:'eslint-prettier',label:'ESLint + Prettier',desc:'Standar JS/TS',badge:'pop'},{value:'none',label:'Tanpa linter'}];
+  }},
+];
+
+const COMPAT_RULES=[
+  {id:'nextjs-laravel',sev:'warning',title:'Next.js + Laravel — dua ekosistem',check:a=>a.frontend_framework==='nextjs'&&a.backend_framework==='laravel',reason:'Next.js sudah punya API Routes. Laravel menambahkan dua server, dua bahasa.',suggestion:'Gunakan Next.js API Routes saja, atau Laravel + Inertia.js sebagai fullstack.'},
+  {id:'firebase-prisma',sev:'error',title:'Firestore tidak kompatibel dengan Prisma',check:a=>a.database==='firebase'&&a.orm==='prisma',reason:'Prisma adalah SQL ORM — tidak bisa dipakai dengan Firestore (NoSQL).',suggestion:'Gunakan Firebase SDK langsung, atau ganti ke PostgreSQL.'},
+  {id:'sqlite-prod',sev:'warning',title:'SQLite kurang ideal untuk Production',check:a=>a.database==='sqlite'&&a.mode==='production',reason:'SQLite tidak support concurrent writes untuk multi-user production.',suggestion:'Gunakan PostgreSQL (Supabase, Neon, Railway) untuk production.'},
+  {id:'elysia-nodejs',sev:'warning',title:'Elysia dioptimasi untuk Bun',check:a=>a.backend_framework==='elysia'&&a.runtime==='nodejs',reason:'Elysia performa terbaik di Bun runtime.',suggestion:'Ganti runtime ke Bun, atau gunakan Fastify / Hono untuk Node.js.'},
+  {id:'nextauth-non-nextjs',sev:'error',title:'NextAuth hanya untuk Next.js',check:a=>a.auth_provider==='nextauth'&&a.frontend_framework!=='nextjs'&&!String(a.backend_framework||'').includes('nextjs'),reason:'NextAuth dirancang untuk Next.js ecosystem.',suggestion:'Gunakan Lucia Auth, Better Auth, atau Clerk untuk framework lain.'},
+];
+
+let state = { answers:{}, step:0, history:[], done:false };
+
+function evalSkip(q,a){
+  if(!q.skipIf)return false;
+  try{return q.skipIf(a);}catch(e){return false;}
+}
+function resolveOpts(q,a){
+  if(!q.options)return null;
+  try{return typeof q.options==='function'?q.options(a):q.options;}catch(e){return[];}
+}
+function resolveDefault(q,a){
+  if(q.default===undefined)return null;
+  try{return typeof q.default==='function'?q.default(a):q.default;}catch(e){return null;}
+}
+function runCompat(a){
+  return COMPAT_RULES.filter(r=>{try{return r.check(a);}catch(e){return false;}});
+}
+
+function getCurrentQuestion(){
+  const sorted=[...QUESTIONS].sort((a,b)=>a.step-b.step);
+  for(const q of sorted){
+    if(q.step<state.step)continue;
+    if(evalSkip(q,state.answers)){
+      state.step=q.step+1;
+      continue;
+    }
+    return q;
+  }
+  return null;
+}
+
+function getActiveFlow(){
+  return QUESTIONS.sort((a,b)=>a.step-b.step).map(q=>({
+    q,
+    skipped:evalSkip(q,state.answers),
+    done:state.answers[q.id]!==undefined||state.step>q.step
+  }));
+}
+
+let currentValue=null;
+
+function render(){
+  const q=getCurrentQuestion();
+  if(!q){showSummary();return;}
+
+  document.getElementById('preset-screen').style.display='none';
+  document.getElementById('main-screen').style.display='block';
+  document.getElementById('summary-screen').style.display='none';
+
+  const total=QUESTIONS.filter(q=>!evalSkip(q,state.answers)).length;
+  const done=Object.keys(state.answers).length;
+  document.getElementById('progress').style.width=Math.min(100,Math.round(done/total*100))+'%';
+  document.getElementById('group-label').textContent=q.group.toUpperCase();
+  document.getElementById('step-count').textContent=(done+1)+' / '+total;
+  document.getElementById('q-prompt').textContent=q.prompt;
+  const hint=document.getElementById('q-hint');
+  if(q.hint){hint.textContent=q.hint;hint.style.display='block';}else{hint.style.display='none';}
+
+  const def=resolveDefault(q,state.answers);
+  currentValue=state.answers[q.id]??def;
+
+  renderOptions(q);
+  renderCompat();
+  renderFlowPreview(q);
+
+  document.getElementById('btn-back').style.display=state.history.length>0?'':'none';
+  document.getElementById('btn-skip').style.display=q.required?'none':'';
+  document.getElementById('btn-next').disabled=!currentValue&&q.required!==false&&q.type!=='confirm';
+}
+
+function renderOptions(q){
+  const container=document.getElementById('q-options');
+  const opts=resolveOpts(q,state.answers);
+
+  if(q.type==='text'){
+    const existing=state.answers[q.id]||resolveDefault(q,state.answers)||'';
+    container.innerHTML=`<input class="text-input" id="text-input" type="text" value="${existing}" placeholder="Ketik di sini..." oninput="handleText(this.value)">`;
+    if(existing)currentValue=existing;
+    setTimeout(()=>document.getElementById('text-input')?.focus(),50);
+    return;
+  }
+
+  if(q.type==='confirm'){
+    container.innerHTML=`<p style="font-size:13px;color:var(--color-text-secondary);margin:0">Review pilihan di bawah sebelum generate. Klik "Generate project" untuk melanjutkan.</p>`;
+    document.getElementById('btn-next').textContent='Konfirmasi dan lanjut';
+    currentValue='yes';
+    return;
+  }
+
+  document.getElementById('btn-next').textContent='Lanjut';
+
+  if(!opts||opts.length===0){container.innerHTML='<p style="font-size:12px;color:var(--color-text-secondary)">Tidak ada pilihan tersedia.</p>';return;}
+
+  const isMulti=q.type==='multi';
+  let selected=currentValue;
+  if(isMulti&&!Array.isArray(selected))selected=selected?[selected]:[];
+
+  const badgeMap={rec:'b-rec',pop:'b-pop',exp:'b-exp',leg:'b-leg',new:'b-new'};
+
+  container.innerHTML=opts.map(opt=>{
+    const isSel=isMulti?selected.includes(opt.value):selected===opt.value;
+    const b=opt.badge?`<span class="badge ${badgeMap[opt.badge]||''}">${opt.badge}</span>`:'';
+    const ctrl=isMulti
+      ?`<div class="opt-checkbox"><span class="opt-check">✓</span></div>`
+      :`<div class="opt-radio"><div class="opt-dot"></div></div>`;
+    return `<div class="opt ${isSel?'selected':''}" onclick="selectOpt(${JSON.stringify(opt.value)},${isMulti})">
+      ${ctrl}
+      <div class="opt-content">
+        <div class="opt-label">${opt.label} ${b}</div>
+        ${opt.desc?`<div class="opt-desc">${opt.desc}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selectOpt(val,isMulti){
+  if(isMulti){
+    let arr=Array.isArray(currentValue)?[...currentValue]:[];
+    const idx=arr.indexOf(val);
+    if(idx>=0)arr.splice(idx,1);else arr.push(val);
+    currentValue=arr;
+  }else{
+    currentValue=val;
+  }
+  const q=getCurrentQuestion();
+  if(q)renderOptions(q);
+  document.getElementById('btn-next').disabled=!currentValue||(Array.isArray(currentValue)&&currentValue.length===0);
+  renderCompat();
+}
+
+function handleText(val){
+  currentValue=val.trim()||null;
+  document.getElementById('btn-next').disabled=!currentValue;
+}
+
+function renderCompat(){
+  const tmpAnswers={...state.answers};
+  const q=getCurrentQuestion();
+  if(q&&currentValue!==null)tmpAnswers[q.id]=currentValue;
+  const issues=runCompat(tmpAnswers);
+  const zone=document.getElementById('compat-zone');
+  if(issues.length===0){zone.innerHTML='';return;}
+  zone.innerHTML=issues.map(i=>`<div class="compat-box compat-${i.sev}">
+    <div class="compat-title">${i.title}</div>
+    <div>${i.reason}</div>
+    <div style="margin-top:4px;opacity:.8">${i.suggestion}</div>
+  </div>`).join('');
+}
+
+function renderFlowPreview(activeQ){
+  const flow=getActiveFlow();
+  const preview=document.getElementById('flow-preview');
+  const visible=flow.filter(f=>!f.skipped||f.done).slice(0,8);
+  preview.innerHTML='<div style="margin-top:12px;font-size:11px;color:var(--color-text-tertiary);margin-bottom:6px;letter-spacing:.05em;text-transform:uppercase">Pertanyaan berikutnya</div>'+
+    visible.map(f=>{
+      const isActive=f.q.id===activeQ.id;
+      const cls=f.skipped?'flow-step skipped':f.done&&!isActive?'flow-step done':isActive?'flow-step active':'flow-step upcoming';
+      const dotCls=f.skipped?'fd-skipped':f.done&&!isActive?'fd-done':isActive?'fd-active':'fd-upcoming';
+      return`<div class="${cls}"><div class="flow-dot ${dotCls}"></div>${f.q.group}: ${f.q.prompt.replace('?','')}</div>`;
+    }).join('');
+}
+
+function submitAnswer(){
+  const q=getCurrentQuestion();
+  if(!q)return;
+  if(currentValue===null&&q.required!==false)return;
+  state.answers[q.id]=currentValue;
+  state.history.push({id:q.id,val:currentValue});
+  state.step=q.step+1;
+  currentValue=null;
+  render();
+}
+
+function skipQuestion(){
+  const q=getCurrentQuestion();
+  if(!q)return;
+  state.step=q.step+1;
+  currentValue=null;
+  render();
+}
+
+function goBack(){
+  if(state.history.length===0)return;
+  const last=state.history.pop();
+  delete state.answers[last.id];
+  const q=QUESTIONS.find(q=>q.id===last.id);
+  if(q)state.step=q.step;
+  currentValue=state.answers[last.id]||null;
+  render();
+}
+
+function showSummary(){
+  document.getElementById('main-screen').style.display='none';
+  document.getElementById('summary-screen').style.display='block';
+
+  const issues=runCompat(state.answers);
+  const compatZone=document.getElementById('summary-compat');
+  compatZone.innerHTML=issues.length>0?issues.map(i=>`<div class="compat-box compat-${i.sev}"><div class="compat-title">${i.title}</div><div>${i.suggestion}</div></div>`).join(''):'';
+
+  const hasError=issues.some(i=>i.sev==='error');
+  document.getElementById('btn-generate').disabled=hasError;
+  document.getElementById('btn-generate').title=hasError?'Selesaikan error kompatibilitas dulu':'';
+
+  const a=state.answers;
+  const groups={};
+  const labelMap={mode:'Mode',extend_feature:'Extend feature',project_name:'Nama project',platform:'Platform',workspace:'Workspace',language:'Bahasa',frontend_framework:'Frontend',backend_framework:'Backend',database:'Database',orm:'ORM',auth_provider:'Auth',hosting:'Hosting',linter:'Linter'};
+  Object.entries(labelMap).forEach(([k,label])=>{
+    if(a[k]&&a[k]!=='none'){
+      const q=QUESTIONS.find(q=>q.id===k);
+      const grp=q?.group||'Lainnya';
+      if(!groups[grp])groups[grp]=[];
+      const val=Array.isArray(a[k])?a[k].join(', '):String(a[k]);
+      groups[grp].push({label,val});
+    }
+  });
+
+  const summaryEl=document.getElementById('summary-content');
+  summaryEl.innerHTML=Object.entries(groups).map(([g,rows])=>`
+    <div class="summary-group">
+      <div class="summary-group-label">${g}</div>
+      ${rows.map(r=>`<div class="summary-row"><span class="summary-key">${r.label}</span><span class="summary-val">${r.val}</span></div>`).join('')}
+    </div>
+  `).join('');
+}
+
+function editSummary(){
+  document.getElementById('summary-screen').style.display='none';
+  document.getElementById('main-screen').style.display='block';
+  state.step=0;
+  render();
+}
+
+function generateProject(){
+  const issues=runCompat(state.answers);
+  if(issues.some(i=>i.sev==='error'))return;
+  const stack=JSON.stringify(state.answers,null,2);
+  sendPrompt('Stack saya sudah siap:\n```json\n'+stack+'\n```\nTolong generate struktur project dan file-file berdasarkan stack ini sesuai schema template database yang sudah kita buat sebelumnya.');
+}
+
+function startFresh(){
+  state={answers:{},step:0,history:[],done:false};
+  currentValue=null;
+  document.getElementById('preset-screen').style.display='none';
+  render();
+}
+
+function loadPreset(id){
+  const presets={
+    'nextjs-supabase-mvp':{mode:'mvp',project_name:'my-saas-app',platform:'web',workspace:'single',language:'typescript',frontend_framework:'nextjs',backend_framework:'supabase-baas',database:'supabase',orm:'prisma',auth_provider:'supabase-auth',hosting:'vercel',linter:'biome'},
+    'nestjs-postgres-production':{mode:'production',project_name:'my-api',platform:'api-only',workspace:'single',language:'typescript',frontend_framework:'none',backend_framework:'nestjs',database:'postgresql',orm:'prisma',auth_provider:'better-auth',hosting:'railway',linter:'biome'},
+    'flutter-supabase-mvp':{mode:'mvp',project_name:'my-mobile-app',platform:'mobile-flutter',language:'dart',frontend_framework:'flutter',backend_framework:'supabase-baas',database:'supabase',orm:'none',auth_provider:'supabase-auth',hosting:'none',linter:'none'},
+    'turborepo-fullstack':{mode:'production',project_name:'my-monorepo',platform:'web',workspace:'turborepo',language:'typescript',frontend_framework:'nextjs',backend_framework:'nestjs',database:'postgresql',orm:'prisma',auth_provider:'clerk',hosting:'vercel',linter:'biome'},
+  };
+  state={answers:{...presets[id]},step:999,history:Object.keys(presets[id]).map(k=>({id:k,val:presets[id][k]})),done:false};
+  showSummary();
+}
+</script>
