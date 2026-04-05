@@ -1,78 +1,92 @@
-import fs from 'fs-extra';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import fs from "fs-extra";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export interface TemplateManifest {
-  id: string;
-  name: string;
-  description: string;
-  mode: string;
-  requiredAnswers: Record<string, string>;
-  files: Array<{
-    path: string;
-    template: string;
-    condition?: string;
-  }>;
-  postGenerate?: {
-    commands?: string[];
-    instructions?: string[];
-  };
+	id: string;
+	name: string;
+	description: string;
+	mode: string;
+	requiredAnswers: Record<string, string>;
+	files: Array<{
+		path: string;
+		template: string;
+		condition?: string;
+	}>;
+	postGenerate?: {
+		commands?: string[];
+		instructions?: string[];
+	};
 }
 
 export class TemplateLoader {
-  private templatesDir: string;
+	private templatesDir: string;
 
-  constructor(templatesDir?: string) {
-    this.templatesDir = templatesDir || path.join(process.cwd(), 'templates');
-  }
+	constructor(templatesDir?: string) {
+		this.templatesDir = templatesDir || path.join(process.cwd(), "templates");
+	}
 
-  async loadManifest(templateId: string): Promise<TemplateManifest | null> {
-    const manifestPath = path.join(this.templatesDir, templateId, 'manifest.json');
-    
-    if (!await fs.pathExists(manifestPath)) {
-      return null;
-    }
+	async loadManifest(templateId: string): Promise<TemplateManifest | null> {
+		const manifestPath = path.join(
+			this.templatesDir,
+			templateId,
+			"manifest.json",
+		);
 
-    return fs.readJson(manifestPath);
-  }
+		if (!(await fs.pathExists(manifestPath))) {
+			return null;
+		}
 
-  async listTemplates(): Promise<Array<{ id: string; name: string; description: string }>> {
-    if (!await fs.pathExists(this.templatesDir)) {
-      return [];
-    }
+		return fs.readJson(manifestPath);
+	}
 
-    const dirs = await fs.readdir(this.templatesDir);
-    const templates = [];
+	async listTemplates(): Promise<
+		Array<{ id: string; name: string; description: string }>
+	> {
+		if (!(await fs.pathExists(this.templatesDir))) {
+			return [];
+		}
 
-    for (const dir of dirs) {
-      const manifest = await this.loadManifest(dir);
-      if (manifest) {
-        templates.push({
-          id: manifest.id,
-          name: manifest.name,
-          description: manifest.description,
-        });
-      }
-    }
+		const dirs = await fs.readdir(this.templatesDir);
+		const templates = [];
 
-    return templates;
-  }
+		for (const dir of dirs) {
+			const manifest = await this.loadManifest(dir);
+			if (manifest) {
+				templates.push({
+					id: manifest.id,
+					name: manifest.name,
+					description: manifest.description,
+				});
+			}
+		}
 
-  async loadTemplateFile(templateId: string, filePath: string): Promise<string | null> {
-    const fullPath = path.join(this.templatesDir, templateId, 'files', filePath);
-    
-    if (!await fs.pathExists(fullPath)) {
-      return null;
-    }
+		return templates;
+	}
 
-    return fs.readFile(fullPath, 'utf-8');
-  }
+	async loadTemplateFile(
+		templateId: string,
+		filePath: string,
+	): Promise<string | null> {
+		const fullPath = path.join(
+			this.templatesDir,
+			templateId,
+			"files",
+			filePath,
+		);
+
+		if (!(await fs.pathExists(fullPath))) {
+			return null;
+		}
+
+		return fs.readFile(fullPath, "utf-8");
+	}
 }
 
 export function createTemplateLoader(templatesDir?: string): TemplateLoader {
-  return new TemplateLoader(templatesDir);
+	return new TemplateLoader(templatesDir);
 }
 
 export default TemplateLoader;
