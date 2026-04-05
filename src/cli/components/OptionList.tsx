@@ -9,6 +9,7 @@ interface OptionListProps {
 	value: string | string[] | null;
 	onChange: (value: string | string[]) => void;
 	onBack?: () => void;
+	onContinue?: () => void;
 }
 
 export const OptionList: React.FC<OptionListProps> = ({
@@ -17,6 +18,7 @@ export const OptionList: React.FC<OptionListProps> = ({
 	value,
 	onChange,
 	onBack,
+	onContinue,
 }) => {
 	const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -42,8 +44,12 @@ export const OptionList: React.FC<OptionListProps> = ({
 			setSelectedIndex((prev) => Math.max(0, prev - 1));
 		} else if (key.downArrow) {
 			setSelectedIndex((prev) => Math.min(options.length - 1, prev + 1));
-		} else if (key.return) {
+		} else if (input === " ") {
+			// Spacebar to select/toggle
 			toggleOption(options[selectedIndex].value);
+		} else if (key.return && onContinue) {
+			// Enter to continue
+			onContinue();
 		} else if (key.escape && onBack) {
 			onBack();
 		}

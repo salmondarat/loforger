@@ -89,6 +89,28 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 			return;
 		}
 
+		// Handle text input
+		if (currentQuestion?.question.type === "text") {
+			if (key.return && currentValue !== null && currentValue !== "") {
+				handleAnswer();
+			} else if (key.escape) {
+				handleBack();
+			} else if (key.backspace || key.delete) {
+				setCurrentValue((prev) => {
+					const str = String(prev ?? "");
+					return str.slice(0, -1);
+				});
+			} else if (input && !key.ctrl && !key.meta && input.length === 1) {
+				// Regular character input
+				setCurrentValue((prev) => {
+					const str = String(prev ?? "");
+					return str + input;
+				});
+			}
+			return;
+		}
+
+		// Handle choice input (handled by OptionList, but catch Enter here as fallback)
 		if (key.return && currentValue !== null) {
 			handleAnswer();
 		} else if (key.escape) {
@@ -149,13 +171,23 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 					value={currentValue ?? currentQuestion.resolvedDefault}
 					onChange={setCurrentValue}
 					onBack={handleBack}
+					onContinue={handleAnswer}
 				/>
 			</Box>
 
 			<Box marginTop={2}>
 				<Text dimColor>
-					Press <Text bold>Enter</Text> to continue, <Text bold>Esc</Text> to go
-					back
+					{currentQuestion.question.type === "text" ? (
+						<>
+							Type your answer, then press <Text bold>Enter</Text> to continue,{" "}
+							<Text bold>Esc</Text> to go back
+						</>
+					) : (
+						<>
+							Press <Text bold>Space</Text> to select, <Text bold>Enter</Text> to continue,{" "}
+							<Text bold>Esc</Text> to go back
+						</>
+					)}
 				</Text>
 			</Box>
 		</Box>

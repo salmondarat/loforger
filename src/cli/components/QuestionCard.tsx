@@ -9,6 +9,7 @@ interface QuestionCardProps {
 	value: AnswerValue;
 	onChange: (value: AnswerValue) => void;
 	onBack?: () => void;
+	onContinue?: () => void;
 }
 
 export const QuestionCard: React.FC<QuestionCardProps> = ({
@@ -16,6 +17,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 	value,
 	onChange,
 	onBack,
+	onContinue,
 }) => {
 	const { question, resolvedOptions, resolvedDefault } = presentation;
 
@@ -28,9 +30,15 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 	if (question.type === "text") {
 		return (
 			<Box flexDirection="column">
+				<Text color="cyan" bold>
+					{question.group.toUpperCase()}
+				</Text>
 				<Text bold>{question.prompt}</Text>
 				{question.hint && <Text dimColor>{question.hint}</Text>}
-				<Text>Text input: {value || "(empty)"}</Text>
+				<Box marginY={1}>
+					<Text color="green">{"> "}{value || ""}</Text>
+					<Text color="gray">{value ? "" : "_"}</Text>
+				</Box>
 			</Box>
 		);
 	}
@@ -60,6 +68,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 						value={value as string | string[] | null}
 						onChange={onChange}
 						onBack={onBack}
+						onContinue={onContinue}
 					/>
 				)}
 			</Box>
