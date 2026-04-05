@@ -1,0 +1,20 @@
+export default function Home() {
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
+        <h1 className="text-4xl font-bold mb-4">Welcome to {{project_name}}</h1>
+        <p className="text-xl mb-8">Generated with Loforger</p>
+        
+        <div className="bg-gray-100 p-6 rounded-lg">
+          <h2 className="text-2xl font-semibold mb-4">Next Steps:</h2>
+          <ol className="list-decimal list-inside space-y-2">
+            <li>Copy .env.example to .env.local</li>
+            <li>Add your Supabase credentials</li>
+            <li>Run npm install</li>
+            <li>Run npm run dev</li>
+          </ol>
+        </div>
+      </div>
+    </main>
+  )
+}
