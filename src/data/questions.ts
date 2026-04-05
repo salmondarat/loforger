@@ -547,14 +547,100 @@ export const QUESTIONS: Question[] = [
 	},
 
 	// ══════════════════════════════════════════════════════════════
-	// STEP 9 — CONFIRM
+	// STEP 9 — EXTEND MODE FEATURES (only for extend mode)
+	// ══════════════════════════════════════════════════════════════
+	{
+		id: "extend_feature",
+		group: "Extend Feature",
+		step: 9,
+		type: "single",
+		prompt: "What feature do you want to add?",
+		hint: "Select a feature to add to your existing project.",
+		skipIf: not(isExtend),
+		required: true,
+		options: [
+			{
+				value: "auth",
+				label: "Authentication",
+				description: "Add login, signup, password reset",
+				badge: "popular",
+			},
+			{
+				value: "database",
+				label: "Database Integration",
+				description: "Add ORM, migrations, models",
+				badge: "popular",
+			},
+			{
+				value: "api",
+				label: "API Routes",
+				description: "Add REST or GraphQL API endpoints",
+				badge: "popular",
+			},
+			{
+				value: "payment",
+				label: "Payments",
+				description: "Add Stripe or other payment processing",
+				badge: "recommended",
+			},
+			{
+				value: "email",
+				label: "Email Service",
+				description: "Add transactional and marketing emails",
+			},
+			{
+				value: "storage",
+				label: "File Storage",
+				description: "Add S3, Cloudinary, or Supabase storage",
+			},
+			{
+				value: "queue",
+				label: "Background Jobs",
+				description: "Add Bull, BullMQ, or custom queue",
+				badge: "experimental",
+			},
+			{
+				value: "testing",
+				label: "Testing Setup",
+				description: "Add Vitest, Jest, Playwright tests",
+			},
+			{
+				value: "custom",
+				label: "Custom Feature",
+				description: "Describe what you need",
+				isCustom: true,
+			},
+		],
+	},
+
+	// ══════════════════════════════════════════════════════════════
+	// STEP 10 — EXTEND CUSTOM DESCRIPTION (if custom feature selected)
+	// ══════════════════════════════════════════════════════════════
+	{
+		id: "extend_custom_description",
+		group: "Custom Feature",
+		step: 10,
+		type: "text",
+		prompt: "Describe the feature you want to add:",
+		hint: "Be specific about what you need.",
+		skipIf: (a) => !isExtend(a) || a.extend_feature !== "custom",
+		required: true,
+		validate: (val) => {
+			if (typeof val !== "string" || val.trim().length < 10)
+				return "Please provide at least 10 characters describing the feature.";
+			return null;
+		},
+	},
+
+	// ══════════════════════════════════════════════════════════════
+	// STEP 11 — CONFIRM
 	// ══════════════════════════════════════════════════════════════
 	{
 		id: "_confirm",
 		group: "Confirm",
-		step: 9,
+		step: 11,
 		type: "confirm",
-		prompt: "Ready to generate your project?",
+		prompt: "Ready to add this feature to your project?",
 		hint: "Review your choices above before confirming.",
 		default: true,
 		required: true,

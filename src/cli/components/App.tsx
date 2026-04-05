@@ -56,7 +56,12 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 	const [showExitConfirm, setShowExitConfirm] = useState(false);
 	const [selectionError, setSelectionError] = useState<string | null>(null);
 
-	const activeFlow = engine.getActiveFlow();
+	const [activeFlow, setActiveFlow] = useState(() => engine.getActiveFlow());
+	
+	const updateActiveFlow = useCallback(() => {
+		setActiveFlow(engine.getActiveFlow());
+	}, [engine]);
+	
 	const currentIndex = activeFlow.findIndex(
 		(q) => q.question.id === currentQuestion?.question.id,
 	);
@@ -77,6 +82,7 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 
 		const newIssues = compatEngine.check(engine.getAnswers());
 		setIssues(newIssues);
+		updateActiveFlow();
 
 		if (result.nextQuestion) {
 			setCurrentQuestion(result.nextQuestion);
@@ -87,7 +93,7 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 		} else {
 			setShowSummary(true);
 		}
-	}, [currentQuestion, currentValue, engine, compatEngine]);
+	}, [currentQuestion, currentValue, engine, compatEngine, updateActiveFlow]);
 
 	const handleBack = useCallback(() => {
 		const previous = engine.goBack();
@@ -98,8 +104,9 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 			setCurrentValue(newValue);
 			setIssues(compatEngine.check(engine.getAnswers()));
 			setSelectionError(null);
+			updateActiveFlow();
 		}
-	}, [engine, compatEngine]);
+	}, [engine, compatEngine, updateActiveFlow]);
 
 	const handleConfirm = useCallback(() => {
 		if (compatEngine.hasBlockingErrors(engine.getAnswers())) {
