@@ -32,7 +32,9 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
-tests
 
-# Documentations
-docs
+# Tests (not included in npm package)
+tests/
+
+# Documentation (not included in npm package)
+docs/
