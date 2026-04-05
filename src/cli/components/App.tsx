@@ -1,6 +1,6 @@
 import { Box, Text, useApp, useInput } from "ink";
-import React from "react";
-import { useCallback, useState } from "react";
+import React from "react"; // biome-ignore lint/style/useImportType: required for JSX runtime
+import { useCallback, useRef, useState } from "react";
 import { CompatibilityEngine } from "../../engine/compatibility-engine.js";
 import { QuestionnaireEngine } from "../../engine/questionnaire-engine.js";
 import type {
@@ -23,9 +23,16 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 	const [currentQuestion, setCurrentQuestion] =
 		useState<QuestionPresentation | null>(() => engine.getNextQuestion());
 	const [currentValue, setCurrentValue] = useState<AnswerValue>(null);
+	const currentValueRef = useRef<AnswerValue>(null);
 	const [issues, setIssues] = useState<CompatibilityIssue[]>([]);
 	const [showSummary, setShowSummary] = useState(false);
 	const [isComplete, setIsComplete] = useState(false);
+
+	// Keep ref in sync with state for useInput handler
+	const updateCurrentValue = useCallback((value: AnswerValue) => {
+		currentValueRef.current = value;
+		setCurrentValue(value);
+	}, []);
 
 	const activeFlow = engine.getActiveFlow();
 	const currentIndex = activeFlow.findIndex(
@@ -56,9 +63,9 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 		const previous = engine.goBack();
 		if (previous) {
 			setCurrentQuestion(previous);
-			setCurrentValue(
-				engine.getAnswers()[previous.question.id] ?? previous.resolvedDefault,
-			);
+			const newValue = engine.getAnswers()[previous.question.id] ?? previous.resolvedDefault;
+			currentValueRef.current = newValue;
+			setCurrentValue(newValue);
 			setIssues(compatEngine.check(engine.getAnswers()));
 		}
 	}, [engine, compatEngine]);
@@ -91,21 +98,33 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 
 		// Handle text input
 		if (currentQuestion?.question.type === "text") {
-			if (key.return && currentValue !== null && currentValue !== "") {
-				handleAnswer();
+			if (key.return && currentValueRef.current) {
+				const value = currentValueRef.current;
+				// Validate before submitting
+				const result = engine.answer(currentQuestion.question.id, value);
+				if (result.ok) {
+					const newIssues = compatEngine.check(engine.getAnswers());
+					setIssues(newIssues);
+					if (result.nextQuestion) {
+						setCurrentQuestion(result.nextQuestion);
+						const newValue = result.nextQuestion.resolvedDefault;
+						currentValueRef.current = newValue;
+						setCurrentValue(newValue);
+					} else {
+						setShowSummary(true);
+					}
+				}
 			} else if (key.escape) {
 				handleBack();
 			} else if (key.backspace || key.delete) {
-				setCurrentValue((prev) => {
-					const str = String(prev ?? "");
-					return str.slice(0, -1);
-				});
+				const newValue = String(currentValueRef.current ?? "").slice(0, -1);
+				currentValueRef.current = newValue || null;
+				setCurrentValue(newValue || null);
 			} else if (input && !key.ctrl && !key.meta && input.length === 1) {
 				// Regular character input
-				setCurrentValue((prev) => {
-					const str = String(prev ?? "");
-					return str + input;
-				});
+				const newValue = String(currentValueRef.current ?? "") + input;
+				currentValueRef.current = newValue;
+				setCurrentValue(newValue);
 			}
 			return;
 		}
@@ -169,7 +188,10 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 				<QuestionCard
 					presentation={currentQuestion}
 					value={currentValue ?? currentQuestion.resolvedDefault}
-					onChange={setCurrentValue}
+					onChange={(value) => {
+						currentValueRef.current = value;
+						setCurrentValue(value);
+					}}
 					onBack={handleBack}
 					onContinue={handleAnswer}
 				/>
@@ -184,8 +206,8 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 						</>
 					) : (
 						<>
-							Press <Text bold>Space</Text> to select, <Text bold>Enter</Text> to continue,{" "}
-							<Text bold>Esc</Text> to go back
+							Press <Text bold>Space</Text> to select, <Text bold>Enter</Text>{" "}
+							to continue, <Text bold>Esc</Text> to go back
 						</>
 					)}
 				</Text>

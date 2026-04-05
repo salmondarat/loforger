@@ -1,5 +1,5 @@
 import { Box, Text, useInput } from "ink";
-import React from "react";
+import React from "react"; // biome-ignore lint/style/useImportType: required for JSX runtime
 import { useState } from "react";
 import type { Option } from "../../types/index.js";
 

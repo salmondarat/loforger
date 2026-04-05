@@ -1,5 +1,5 @@
 import { Box, Text } from "ink";
-import React from "react";
+import React from "react"; // biome-ignore lint/style/useImportType: required for JSX runtime
 import type { CompatibilityIssue } from "../../types/index.js";
 
 interface SummaryViewProps {

@@ -1,5 +1,5 @@
 import { Box, Text } from "ink";
-import React from "react";
+import React from "react"; // biome-ignore lint/style/useImportType: required for JSX runtime
 import { useEffect } from "react";
 import type { AnswerValue, QuestionPresentation } from "../../types/index.js";
 import OptionList from "./OptionList.js";
@@ -36,7 +36,10 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 				<Text bold>{question.prompt}</Text>
 				{question.hint && <Text dimColor>{question.hint}</Text>}
 				<Box marginY={1}>
-					<Text color="green">{"> "}{value || ""}</Text>
+					<Text color="green">
+						{"> "}
+						{value || ""}
+					</Text>
 					<Text color="gray">{value ? "" : "_"}</Text>
 				</Box>
 			</Box>
