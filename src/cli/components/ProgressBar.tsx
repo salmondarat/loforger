@@ -16,15 +16,26 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
 	const filled = Math.round((current / total) * 20);
 	const empty = 20 - filled;
 
+	// Determine color based on progress
+	let color: string;
+	if (percentage < 30) color = "red";
+	else if (percentage < 60) color = "yellow";
+	else if (percentage < 90) color = "blue";
+	else color = "green";
+
 	return (
-		<Box flexDirection="column">
-			{label && <Text dimColor>{label}</Text>}
+		<Box flexDirection="column" marginY={1}>
+			{label && (
+				<Text dimColor>
+					{label} {" "}
+					<Text color={color}>{percentage}%</Text>
+				</Text>
+			)}
 			<Box>
-				<Text color="cyan">{"█".repeat(filled)}</Text>
+				<Text color={color}>{"█".repeat(filled)}</Text>
 				<Text dimColor>{"░".repeat(empty)}</Text>
-				<Text>
-					{" "}
-					{percentage}% ({current}/{total})
+				<Text dimColor>
+					{" "}({current}/{total})
 				</Text>
 			</Box>
 		</Box>

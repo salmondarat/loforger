@@ -62,22 +62,50 @@ export const OptionList: React.FC<OptionListProps> = ({
 				const highlighted = index === selectedIndex;
 
 				return (
-					<Box key={opt.value}>
+					<Box key={opt.value} marginY={0}>
 						<Text>
-							{highlighted ? ">" : " "}{" "}
-							{type === "multi"
-								? selected
-									? "[x]"
-									: "[ ]"
-								: selected
-									? "(*)"
-									: "( )"}{" "}
-							<Text bold={highlighted}>{opt.label}</Text>
+							{/* Selection indicator */}
+							{highlighted ? (
+								<Text color="cyan">{"❯"}</Text>
+							) : (
+								<Text> {" "}</Text>
+							)}{" "}
+							{/* Checkbox/Radio indicator */}
+							{type === "multi" ? (
+								selected ? (
+									<Text color="green">[✓]</Text>
+								) : (
+									<Text color="gray">[ ]</Text>
+								)
+							) : selected ? (
+								<Text color="green">(●)</Text>
+							) : (
+								<Text color="gray">(○)</Text>
+							)}{" "}
+							{/* Label with highlight */}
+							{highlighted ? (
+								<Text color="cyan" bold>
+									{opt.label}
+								</Text>
+							) : selected ? (
+								<Text color="green">{opt.label}</Text>
+							) : (
+								<Text>{opt.label}</Text>
+							)}
+							{/* Badge */}
 							{opt.badge && (
-								<Text color={getBadgeColor(opt.badge)}> [{opt.badge}]</Text>
+								<Text color={getBadgeColor(opt.badge)}>
+									{" "}
+									{formatBadge(opt.badge)}
+								</Text>
 							)}
 						</Text>
-						{opt.description && <Text dimColor> - {opt.description}</Text>}
+						{/* Description */}
+						{opt.description && (
+							<Text dimColor>
+								{" "}- {opt.description}
+							</Text>
+						)}
 					</Box>
 				);
 			})}
@@ -95,8 +123,27 @@ function getBadgeColor(badge: string): string {
 			return "yellow";
 		case "legacy":
 			return "gray";
+		case "new":
+			return "magenta";
 		default:
 			return "white";
+	}
+}
+
+function formatBadge(badge: string): string {
+	switch (badge) {
+		case "recommended":
+			return "★ Recommended";
+		case "popular":
+			return "🔥 Popular";
+		case "experimental":
+			return "🧪 Experimental";
+		case "legacy":
+			return "⚠ Legacy";
+		case "new":
+			return "✨ New";
+		default:
+			return badge;
 	}
 }
 

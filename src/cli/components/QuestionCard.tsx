@@ -31,16 +31,24 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 		return (
 			<Box flexDirection="column">
 				<Text color="cyan" bold>
-					{question.group.toUpperCase()}
+					◆ {question.group.toUpperCase()}
 				</Text>
-				<Text bold>{question.prompt}</Text>
-				{question.hint && <Text dimColor>{question.hint}</Text>}
 				<Box marginY={1}>
-					<Text color="green">
-						{"> "}
+					<Text bold>{question.prompt}</Text>
+				</Box>
+				{question.hint && (
+					<Box marginBottom={1}>
+						<Text dimColor>💡 {question.hint}</Text>
+					</Box>
+				)}
+				<Box marginY={1}>
+					<Text color="cyan">{"❯ "}</Text>
+					<Text color="green" bold>
 						{value || ""}
 					</Text>
-					<Text color="gray">{value ? "" : "_"}</Text>
+					{!value && (
+						<Text color="gray">_</Text>
+					)}
 				</Box>
 			</Box>
 		);
@@ -49,9 +57,16 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 	if (question.type === "confirm") {
 		return (
 			<Box flexDirection="column">
-				<Text bold>{question.prompt}</Text>
-				{question.hint && <Text dimColor>{question.hint}</Text>}
-				<Text>Press Enter to confirm...</Text>
+				<Text color="cyan" bold>
+					◆ {question.group.toUpperCase()}
+				</Text>
+				<Box marginY={1}>
+					<Text bold>{question.prompt}</Text>
+				</Box>
+				{question.hint && <Text dimColor>💡 {question.hint}</Text>}
+				<Box marginY={1}>
+					<Text color="yellow">⚡ Ready to continue? Press Enter...</Text>
+				</Box>
 			</Box>
 		);
 	}
@@ -59,10 +74,16 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 	return (
 		<Box flexDirection="column">
 			<Text color="cyan" bold>
-				{question.group.toUpperCase()}
+				◆ {question.group.toUpperCase()}
 			</Text>
-			<Text bold>{question.prompt}</Text>
-			{question.hint && <Text dimColor>{question.hint}</Text>}
+			<Box marginY={1}>
+				<Text bold>{question.prompt}</Text>
+			</Box>
+			{question.hint && (
+				<Box marginBottom={1}>
+					<Text dimColor>💡 {question.hint}</Text>
+				</Box>
+			)}
 			<Box marginY={1}>
 				{resolvedOptions && (
 					<OptionList
