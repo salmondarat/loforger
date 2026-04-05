@@ -8,10 +8,10 @@
     "loforger": "./dist/index.js"
   },
   "scripts": {
-    "build": "tsc && chmod +x dist/index.js",
-    "dev": "tsc --watch",
-    "test": "node node_modules/vitest/vitest.mjs",
-    "lint": "biome check src/"
+    "build": "node node_modules/typescript/bin/tsc && chmod +x dist/index.js",
+    "dev": "node node_modules/typescript/bin/tsc --watch",
+    "test": "node node_modules/vitest/vitest.mjs --run",
+    "lint": "node node_modules/@biomejs/biome/bin/biome check src/"
   },
   "keywords": [
     "cli",
