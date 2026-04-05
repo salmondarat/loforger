@@ -10,7 +10,7 @@
   "scripts": {
     "build": "tsc && chmod +x dist/index.js",
     "dev": "tsc --watch",
-    "test": "vitest",
+    "test": "node node_modules/vitest/vitest.mjs",
     "lint": "biome check src/"
   },
   "keywords": [
