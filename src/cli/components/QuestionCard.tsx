@@ -10,6 +10,7 @@ interface QuestionCardProps {
 	onChange: (value: AnswerValue) => void;
 	onBack?: () => void;
 	onContinue?: () => void;
+	maxWidth?: number;
 }
 
 export const QuestionCard: React.FC<QuestionCardProps> = ({
@@ -18,6 +19,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 	onChange,
 	onBack,
 	onContinue,
+	maxWidth = 80,
 }) => {
 	const { question, resolvedOptions, resolvedDefault } = presentation;
 
@@ -29,16 +31,16 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 
 	if (question.type === "text") {
 		return (
-			<Box flexDirection="column">
+			<Box flexDirection="column" width={maxWidth}>
 				<Text color="cyan" bold>
 					◆ {question.group.toUpperCase()}
 				</Text>
 				<Box marginY={1}>
-					<Text bold>{question.prompt}</Text>
+					<Text bold wrap="end">{question.prompt}</Text>
 				</Box>
 				{question.hint && (
 					<Box marginBottom={1}>
-						<Text dimColor>💡 {question.hint}</Text>
+						<Text dimColor wrap="end">💡 {question.hint}</Text>
 					</Box>
 				)}
 				<Box marginY={1}>
@@ -56,14 +58,14 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 
 	if (question.type === "confirm") {
 		return (
-			<Box flexDirection="column">
+			<Box flexDirection="column" width={maxWidth}>
 				<Text color="cyan" bold>
 					◆ {question.group.toUpperCase()}
 				</Text>
 				<Box marginY={1}>
-					<Text bold>{question.prompt}</Text>
+					<Text bold wrap="end">{question.prompt}</Text>
 				</Box>
-				{question.hint && <Text dimColor>💡 {question.hint}</Text>}
+				{question.hint && <Text dimColor wrap="end">💡 {question.hint}</Text>}
 				<Box marginY={1}>
 					<Text color="yellow">⚡ Ready to continue? Press Enter...</Text>
 				</Box>
@@ -72,16 +74,16 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 	}
 
 	return (
-		<Box flexDirection="column">
+		<Box flexDirection="column" width={maxWidth}>
 			<Text color="cyan" bold>
 				◆ {question.group.toUpperCase()}
 			</Text>
 			<Box marginY={1}>
-				<Text bold>{question.prompt}</Text>
+				<Text bold wrap="end">{question.prompt}</Text>
 			</Box>
 			{question.hint && (
 				<Box marginBottom={1}>
-					<Text dimColor>💡 {question.hint}</Text>
+					<Text dimColor wrap="end">💡 {question.hint}</Text>
 				</Box>
 			)}
 			<Box marginY={1}>
@@ -93,6 +95,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 						onChange={onChange}
 						onBack={onBack}
 						onContinue={onContinue}
+						maxWidth={maxWidth}
 					/>
 				)}
 			</Box>

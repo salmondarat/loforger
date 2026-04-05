@@ -5,16 +5,24 @@ interface ProgressBarProps {
 	current: number;
 	total: number;
 	label?: string;
+	width?: number;
 }
 
 export const ProgressBar: React.FC<ProgressBarProps> = ({
 	current,
 	total,
 	label,
+	width = 50,
 }) => {
 	const percentage = Math.round((current / total) * 100);
-	const filled = Math.round((current / total) * 20);
-	const empty = 20 - filled;
+	
+	// Calculate bar width based on available width
+	const minBarWidth = 20;
+	const maxBarWidth = 50;
+	const barWidth = Math.max(minBarWidth, Math.min(maxBarWidth, width - 15));
+	
+	const filled = Math.round((current / total) * barWidth);
+	const empty = barWidth - filled;
 
 	// Determine color based on progress
 	let color: string;
@@ -25,18 +33,13 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
 
 	return (
 		<Box flexDirection="column" marginY={1}>
-			{label && (
-				<Text dimColor>
-					{label} {" "}
-					<Text color={color}>{percentage}%</Text>
-				</Text>
-			)}
+			<Text dimColor>
+				Step {current} of {total} {" "}
+				<Text color={color}>({percentage}%)</Text>
+			</Text>
 			<Box>
 				<Text color={color}>{"█".repeat(filled)}</Text>
 				<Text dimColor>{"░".repeat(empty)}</Text>
-				<Text dimColor>
-					{" "}({current}/{total})
-				</Text>
 			</Box>
 		</Box>
 	);

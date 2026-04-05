@@ -1,6 +1,6 @@
-import { Box, Text, useApp, useInput } from "ink";
+import { Box, Text, useApp, useInput, useStdout } from "ink";
 import React from "react"; // biome-ignore lint/style/useImportType: required for JSX runtime
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
 import { CompatibilityEngine } from "../../engine/compatibility-engine.js";
 import { QuestionnaireEngine } from "../../engine/questionnaire-engine.js";
 import type {
@@ -16,8 +16,34 @@ interface AppProps {
 	initialAnswers?: Record<string, AnswerValue>;
 }
 
+// Hook to get terminal dimensions
+function useTerminalSize() {
+	const { stdout } = useStdout();
+	const [size, setSize] = useState({
+		columns: stdout?.columns || 80,
+		rows: stdout?.rows || 24,
+	});
+
+	useEffect(() => {
+		const handleResize = () => {
+			setSize({
+				columns: stdout?.columns || 80,
+				rows: stdout?.rows || 24,
+			});
+		};
+
+		stdout?.on("resize", handleResize);
+		return () => {
+			stdout?.off("resize", handleResize);
+		};
+	}, [stdout]);
+
+	return size;
+}
+
 export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 	const { exit } = useApp();
+	const { columns } = useTerminalSize();
 	const [engine] = useState(() => new QuestionnaireEngine(initialAnswers));
 	const [compatEngine] = useState(() => new CompatibilityEngine());
 	const [currentQuestion, setCurrentQuestion] =
@@ -35,6 +61,10 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 		(q) => q.question.id === currentQuestion?.question.id,
 	);
 	const isFirstQuestion = currentIndex === 0;
+
+	// Calculate responsive widths
+	const maxWidth = Math.min(columns - 4, 100);
+	const contentWidth = Math.min(columns - 2, 100);
 
 	const handleAnswer = useCallback(() => {
 		if (!currentQuestion) return;
@@ -152,9 +182,8 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 
 		// Handle choice input
 		if (key.return) {
-			// Check if an option is actually selected (not just the default)
 			if (currentValue === null || currentValue === currentQuestion?.resolvedDefault) {
-				setSelectionError("⚠ Please select an option using Spacebar before continuing");
+				setSelectionError("Please select an option using Spacebar before continuing");
 				return;
 			}
 			handleAnswer();
@@ -165,19 +194,24 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 				handleBack();
 			}
 		} else if (input === " ") {
-			// Spacebar was pressed, clear any error
 			setSelectionError(null);
 		}
 	});
 
 	if (isComplete) {
 		return (
-			<Box flexDirection="column" padding={2}>
-				<Box borderStyle="round" borderColor="green" padding={1}>
+			<Box flexDirection="column" alignItems="center" justifyContent="center" height={10}>
+				<Box
+					borderStyle="round"
+					borderColor="green"
+					padding={1}
+					width={Math.min(50, maxWidth)}
+					alignItems="center"
+					justifyContent="center"
+				>
 					<Text color="green" bold>
-						✓ Project configuration complete!
+						✓ Configuration Complete!
 					</Text>
-					<Text dimColor>Your project template is ready to generate.</Text>
 				</Box>
 			</Box>
 		);
@@ -185,17 +219,26 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 
 	if (showExitConfirm) {
 		return (
-			<Box flexDirection="column" padding={2} alignItems="center">
-				<Box borderStyle="round" borderColor="yellow" padding={2}>
+			<Box flexDirection="column" alignItems="center" justifyContent="center" height={12}>
+				<Box
+					borderStyle="round"
+					borderColor="yellow"
+					padding={1}
+					width={Math.min(50, maxWidth)}
+					flexDirection="column"
+					alignItems="center"
+				>
 					<Text color="yellow" bold>
 						⚠ Exit Confirmation
 					</Text>
-					<Text>Are you sure you want to exit?</Text>
-					<Text dimColor>All progress will be lost.</Text>
+					<Box marginY={1} flexDirection="column" alignItems="center">
+						<Text>Are you sure you want to exit?</Text>
+						<Text dimColor>All progress will be lost.</Text>
+					</Box>
 					<Box marginTop={1}>
 						<Text>
-							Press <Text bold color="red">Y</Text> to exit or{" "}
-							<Text bold color="green">N</Text> to continue
+							<Text bold color="green">Y</Text> - Yes, exit{"  "}
+							<Text bold color="red">N</Text> - No, continue
 						</Text>
 					</Box>
 				</Box>
@@ -205,41 +248,47 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 
 	if (showSummary) {
 		return (
-			<SummaryView
-				summary={engine.getSummary()}
-				issues={issues}
-				onConfirm={handleConfirm}
-				onEdit={handleEdit}
-			/>
+			<Box width={contentWidth}>
+				<SummaryView
+					summary={engine.getSummary()}
+					issues={issues}
+					onConfirm={handleConfirm}
+					onEdit={handleEdit}
+				/>
+			</Box>
 		);
 	}
 
 	if (!currentQuestion) {
-		return <Text>No questions available.</Text>;
+		return (
+			<Box flexDirection="column" alignItems="center" justifyContent="center" height={10}>
+				<Text>No questions available.</Text>
+			</Box>
+		);
 	}
 
 	return (
-		<Box flexDirection="column" padding={1}>
+		<Box flexDirection="column" width={contentWidth}>
 			{/* Header */}
-			<Box marginBottom={1}>
+			<Box marginBottom={1} flexDirection="column">
 				<Text color="cyan" bold>
 					◈ Loforger
 				</Text>
-				<Text dimColor> - Project Scaffolding Tool</Text>
+				<Text dimColor>Project Scaffolding Tool</Text>
 			</Box>
 
 			{/* Progress */}
 			<ProgressBar
 				current={currentIndex + 1}
 				total={activeFlow.length}
-				label={`Step ${currentIndex + 1} of ${activeFlow.length}`}
+				width={maxWidth}
 			/>
 
 			{/* Selection Error */}
 			{selectionError && (
-				<Box marginY={1} paddingX={1} paddingY={0}>
+				<Box marginY={1}>
 					<Text color="red" bold>
-						{selectionError}
+						✗ {selectionError}
 					</Text>
 				</Box>
 			)}
@@ -248,7 +297,7 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 			{issues.length > 0 && (
 				<Box marginY={1} flexDirection="column">
 					{issues.map((issue) => (
-						<Box key={issue.id} marginY={0}>
+						<Box key={issue.id}>
 							<Text
 								color={issue.severity === "error" ? "red" : "yellow"}
 							>
@@ -260,7 +309,7 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 			)}
 
 			{/* Question Card */}
-			<Box marginY={1} borderStyle="single" padding={1}>
+			<Box marginY={1} borderStyle="single" padding={1} width={maxWidth}>
 				<QuestionCard
 					presentation={currentQuestion}
 					value={currentValue ?? currentQuestion.resolvedDefault}
@@ -271,22 +320,23 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 					}}
 					onBack={handleBack}
 					onContinue={handleAnswer}
+					maxWidth={maxWidth - 4}
 				/>
 			</Box>
 
 			{/* Help Text */}
 			<Box marginTop={1}>
-				<Text dimColor>
+				<Text dimColor wrap="end">
 					{currentQuestion.question.type === "text" ? (
 						<>
-							Type your answer, then press <Text bold color="green">Enter</Text>{" "}
-							to continue, <Text bold color="yellow">Esc</Text> to exit
+							Type answer, <Text bold color="green">Enter</Text> to continue,{" "}
+							<Text bold color="yellow">Esc</Text> to exit
 						</>
 					) : (
 						<>
-							Press <Text bold color="blue">Space</Text> to select,{" "}
-							<Text bold color="green">Enter</Text> to continue,{" "}
-							<Text bold color="yellow">Esc</Text> to go back
+							<Text bold color="blue">Space</Text> select,{" "}
+							<Text bold color="green">Enter</Text> continue,{" "}
+							<Text bold color="yellow">Esc</Text> back
 						</>
 					)}
 				</Text>

@@ -10,6 +10,7 @@ interface OptionListProps {
 	onChange: (value: string | string[]) => void;
 	onBack?: () => void;
 	onContinue?: () => void;
+	maxWidth?: number;
 }
 
 export const OptionList: React.FC<OptionListProps> = ({
@@ -19,6 +20,7 @@ export const OptionList: React.FC<OptionListProps> = ({
 	onChange,
 	onBack,
 	onContinue,
+	maxWidth = 80,
 }) => {
 	const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -56,33 +58,35 @@ export const OptionList: React.FC<OptionListProps> = ({
 	});
 
 	return (
-		<Box flexDirection="column">
+		<Box flexDirection="column" width={maxWidth}>
 			{options.map((opt, index) => {
 				const selected = isSelected(opt.value);
 				const highlighted = index === selectedIndex;
 
 				return (
-					<Box key={opt.value} marginY={0}>
-						<Text>
+					<Box key={opt.value} marginY={0} flexDirection="column">
+						<Box>
 							{/* Selection indicator */}
 							{highlighted ? (
-								<Text color="cyan">{"❯"}</Text>
+								<Text color="cyan">{"❯ "}</Text>
 							) : (
-								<Text> {" "}</Text>
-							)}{" "}
+								<Text>{"  "}</Text>
+							)}
+							
 							{/* Checkbox/Radio indicator */}
 							{type === "multi" ? (
 								selected ? (
-									<Text color="green">[✓]</Text>
+									<Text color="green">[✓] </Text>
 								) : (
-									<Text color="gray">[ ]</Text>
+									<Text color="gray">[ ] </Text>
 								)
 							) : selected ? (
-								<Text color="green">(●)</Text>
+								<Text color="green">(●) </Text>
 							) : (
-								<Text color="gray">(○)</Text>
-							)}{" "}
-							{/* Label with highlight */}
+								<Text color="gray">(○) </Text>
+							)}
+							
+							{/* Label */}
 							{highlighted ? (
 								<Text color="cyan" bold>
 									{opt.label}
@@ -92,6 +96,7 @@ export const OptionList: React.FC<OptionListProps> = ({
 							) : (
 								<Text>{opt.label}</Text>
 							)}
+							
 							{/* Badge */}
 							{opt.badge && (
 								<Text color={getBadgeColor(opt.badge)}>
@@ -99,12 +104,15 @@ export const OptionList: React.FC<OptionListProps> = ({
 									{formatBadge(opt.badge)}
 								</Text>
 							)}
-						</Text>
-						{/* Description */}
+						</Box>
+						
+						{/* Description on next line if exists */}
 						{opt.description && (
-							<Text dimColor>
-								{" "}- {opt.description}
-							</Text>
+							<Box marginLeft={4}>
+								<Text dimColor wrap="end">
+									{opt.description}
+								</Text>
+							</Box>
 						)}
 					</Box>
 				);

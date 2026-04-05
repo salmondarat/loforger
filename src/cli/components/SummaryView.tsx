@@ -29,7 +29,7 @@ export const SummaryView: React.FC<SummaryViewProps> = ({
 	);
 
 	return (
-		<Box flexDirection="column" padding={1}>
+		<Box flexDirection="column">
 			{/* Header */}
 			<Box marginBottom={1}>
 				<Text color="cyan" bold>
@@ -59,9 +59,9 @@ export const SummaryView: React.FC<SummaryViewProps> = ({
 					</Text>
 					{errors.map((issue) => (
 						<Box key={issue.id} marginY={0} flexDirection="column">
-							<Text color="red">• {issue.title}</Text>
-							<Text dimColor> {issue.reason}</Text>
-							<Text color="yellow">→ {issue.suggestion}</Text>
+							<Text color="red" wrap="end">• {issue.title}</Text>
+							<Text dimColor wrap="end">  {issue.reason}</Text>
+							<Text color="yellow" wrap="end">  → {issue.suggestion}</Text>
 						</Box>
 					))}
 				</Box>
@@ -81,8 +81,8 @@ export const SummaryView: React.FC<SummaryViewProps> = ({
 					</Text>
 					{warnings.map((issue) => (
 						<Box key={issue.id} marginY={0}>
-							<Text color="yellow">• {issue.title}</Text>
-							<Text dimColor>{issue.suggestion}</Text>
+							<Text color="yellow" wrap="end">• {issue.title}</Text>
+							<Text dimColor wrap="end">  {issue.suggestion}</Text>
 						</Box>
 					))}
 				</Box>
@@ -99,7 +99,7 @@ export const SummaryView: React.FC<SummaryViewProps> = ({
 							{items.map((item) => (
 								<Box key={item.label}>
 									<Text dimColor>{item.label}:</Text>
-									<Text color="green"> {item.value}</Text>
+									<Text color="green" wrap="end"> {item.value}</Text>
 								</Box>
 								))}
 							</Box>
@@ -110,12 +110,12 @@ export const SummaryView: React.FC<SummaryViewProps> = ({
 			{/* Actions */}
 			<Box marginTop={1}>
 				{errors.length === 0 ? (
-					<Text>
+					<Text wrap="end">
 						Press <Text bold color="green">Enter</Text> to generate project or{" "}
 						<Text bold color="yellow">e</Text> to edit configuration
 					</Text>
 				) : (
-					<Text color="red">
+					<Text color="red" wrap="end">
 						Please fix errors above. Press <Text bold>e</Text> to go back and edit.
 					</Text>
 				)}
