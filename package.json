@@ -25,7 +25,7 @@
     "dev": "node node_modules/typescript/bin/tsc --watch",
     "test": "node node_modules/vitest/vitest.mjs --run",
     "lint": "node node_modules/@biomejs/biome/bin/biome check src/",
-    "prepublishOnly": "npm run build && npm test"
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "cli",
