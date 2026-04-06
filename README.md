@@ -12,15 +12,27 @@ Interactive CLI for scaffolding modern web projects with best practices built-in
 
 ## Installation
 
-```bash
-npm install -g loforger
-```
-
-Or use npx (no install required):
+### Quick Start (Recommended)
 
 ```bash
 npx loforger create
 ```
+
+### Global Installation
+
+**For NTFS/FUSE filesystems (Windows, WSL):**
+```bash
+git clone https://github.com/yourusername/loforger.git
+cd loforger
+./scripts/install.sh
+```
+
+**For standard Unix filesystems:**
+```bash
+npm install -g loforger
+```
+
+See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed installation options and troubleshooting.
 
 ## Quick Start
 

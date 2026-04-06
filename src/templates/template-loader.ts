@@ -25,7 +25,9 @@ export class TemplateLoader {
 	private templatesDir: string;
 
 	constructor(templatesDir?: string) {
-		this.templatesDir = templatesDir || path.join(process.cwd(), "templates");
+		// Saat di-install globally, template ada di ../../templates relative ke file ini (dist/templates/template-loader.js)
+		const packageTemplatesDir = path.join(__dirname, "..", "..", "templates");
+		this.templatesDir = templatesDir || packageTemplatesDir;
 	}
 
 	async loadManifest(templateId: string): Promise<TemplateManifest | null> {
