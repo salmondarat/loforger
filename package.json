@@ -1,6 +1,6 @@
 {
   "name": "loforger",
-    "0.2.0",
+  "version": "0.2.0",
   "description": "Interactive CLI for scaffolding modern web projects",
   "type": "module",
   "main": "./dist/index.js",
@@ -10,17 +10,13 @@
   "files": [
     "dist",
     "templates",
-    "scripts/postinstall.js",
-    "scripts/fix-permissions.js",
-    "scripts/loforger.cmd",
-    "scripts/install.sh",
-    "scripts/loforger-wrapper.sh",
+    "scripts",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
   ],
   "scripts": {
-    "build": "node node_modules/typescript/bin/tsc && node scripts/fix-permissions.js",
+    "build": "node node_modules/typescript/bin/tsc",
     "postinstall": "node scripts/postinstall.js",
     "dev": "node node_modules/typescript/bin/tsc --watch",
     "test": "node node_modules/vitest/vitest.mjs --run",
