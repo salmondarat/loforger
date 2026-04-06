@@ -17,7 +17,8 @@
       "Bash(npm publish:*)",
       "Bash(npm pack:*)",
       "Bash(npm version:*)",
-      "Bash(npm --no-git-tag-version false commit-hooks --2)"
+      "Bash(npm --no-git-tag-version false commit-hooks --2)",
+      "Bash(npm view:*)"
     ]
   }
 }
