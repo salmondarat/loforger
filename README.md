@@ -22,7 +22,7 @@ npx loforger create
 
 **For NTFS/FUSE filesystems (Windows, WSL):**
 ```bash
-git clone https://github.com/yourusername/loforger.git
+git clone https://github.com/salmondarat/loforger.git
 cd loforger
 ./scripts/install.sh
 ```
