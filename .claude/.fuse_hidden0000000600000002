@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(plugin-dev:create-plugin)",
+      "Skill(plugin-dev:create-plugin:*)",
+      "Bash(ls -la /home/salmon/.claude/plugins/*/)",
+      "Bash(python3 -c json)"
+    ]
+  }
+}
