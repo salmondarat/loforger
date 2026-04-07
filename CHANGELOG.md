@@ -1,36 +1,110 @@
 # Changelog
 
 All notable changes to Loforger will be documented in this file.
+## [v0.2.6] - 2026-04-07
 
-## [0.1.0] - 2026-04-05
 
-### Added
-- Initial release of Loforger CLI
-- Interactive questionnaire with 10 core questions
-- Three project modes: MVP, Production, Extend
-- Real-time compatibility checking with 8 rules
-- Beautiful terminal UI using Ink and React
-- Template system with Handlebars rendering
-- Sample template: Next.js + Supabase MVP
-- Keyboard navigation (arrows, Enter, Escape)
-- Summary screen with configuration review
-- Comprehensive test suite (15 tests)
-- CLI commands: create, list-presets
-- Preset support for quick project setup
+### Bug Fixes
+
+- Correct git-cliff template variable and lint errors
+
+## [v0.2.5] - 2026-04-07
+
+
+### Bug Fixes
+
+- Replace git-cliff-action Docker with direct binary install
+
+
+### Miscellaneous
+
+- Add biome.json linter config
+
+## [v0.2.4] - 2026-04-07
+
 
 ### Features
-- Dynamic question flow based on previous answers
-- Skip logic for irrelevant questions
-- Post-hooks for auto-setting related values
-- Validation for user inputs
-- Back navigation to edit previous answers
-- Error and warning messages for incompatible stacks
 
-## Upcoming
+- Fix file generation, add post-generation review, overhaul CI/CD, polish UI
 
-- Context7 integration for live documentation
-- Additional templates (NestJS, FastAPI, Flutter)
-- Extend mode for adding features to existing projects
-- MCP server for Claude Code integration
-- Configuration file support
-- Template validation and testing tools
+
+### Miscellaneous
+
+- Add .claude/ to .gitignore
+
+- Stop tracking .claude/settings.local.json
+
+## [v0.2.2] - 2026-04-06
+
+
+### Bug Fixes
+
+- Update build scripts to work around permission issues
+
+- Add Escape key support for going back in questionnaire
+
+- Use ref to track current value for Enter key in text input
+
+- Add extend mode specific questions and fix progress bar calculation
+
+- Remove npm test from prepublishOnly forNTFS compatibility
+
+- Repair package.json for JSON syntax and version bump to 0.2.0
+
+
+### Documentation
+
+- Add comprehensive documentation
+
+
+### Features
+
+- Add core type definitions
+
+- Implement questionnaire engine with dynamic questions
+
+- Add compatibility engine with rule-based validation
+
+- Add Ink-based CLI UI components
+
+- Add main app and CLI entry point
+
+- Add template loading and file generation system
+
+- Add Next.js+Supabase MVP template
+
+- Add spacebar selection and proper text input with live typing
+
+- Improve UI with better styling, add exit confirmation, prevent continuing without selection, show detailed summary
+
+- Make UI fully responsive and scalable to terminal size
+
+- Add multi-platform support and installation scripts
+
+- Cross-platform install with NTFS/FUSE auto-detection
+
+
+### Miscellaneous
+
+- Initial project setup
+
+- Prepare for npm publishing - add license, files field, metadata
+
+- Properly format docs and tests in .gitignore
+
+- Bump version to 0.2.0
+
+- Bump version 0.2.1
+
+- Clean up temp files
+
+
+### Styling
+
+- Fix biome lint errors and code formatting
+
+
+### Testing
+
+- Add comprehensive test suite
+
