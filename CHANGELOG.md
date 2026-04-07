@@ -8,8 +8,12 @@ All notable changes to Loforger will be documented in this file.
 
 - Trigger npm publish directly from release workflow
 
+- Remove --provenance from npm publish to fix 2FA conflict
+
 
 ### Documentation
+
+- Update changelog [skip release]
 
 - Update changelog [skip release]
 
