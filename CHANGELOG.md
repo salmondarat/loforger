@@ -1,6 +1,18 @@
 # Changelog
 
 All notable changes to Loforger will be documented in this file.
+## [] - 1970-01-01
+
+
+### Bug Fixes
+
+- Trigger npm publish directly from release workflow
+
+
+### Documentation
+
+- Update changelog [skip release]
+
 ## [v0.2.6] - 2026-04-07
 
 
