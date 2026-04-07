@@ -2,6 +2,7 @@ import { Box, Text, useInput } from "ink";
 import React from "react"; // biome-ignore lint/style/useImportType: required for JSX runtime
 import { useState } from "react";
 import type { Option } from "../../types/index.js";
+import { THEME } from "../theme.js";
 
 interface OptionListProps {
 	options: Option[];
@@ -47,10 +48,8 @@ export const OptionList: React.FC<OptionListProps> = ({
 		} else if (key.downArrow) {
 			setSelectedIndex((prev) => Math.min(options.length - 1, prev + 1));
 		} else if (input === " ") {
-			// Spacebar to select/toggle
 			toggleOption(options[selectedIndex].value);
 		} else if (key.return && onContinue) {
-			// Enter to continue
 			onContinue();
 		} else if (key.escape && onBack) {
 			onBack();
@@ -64,39 +63,39 @@ export const OptionList: React.FC<OptionListProps> = ({
 				const highlighted = index === selectedIndex;
 
 				return (
-					<Box key={opt.value} marginY={0} flexDirection="column">
+					<Box key={opt.value} marginY={0.25} flexDirection="column">
 						<Box>
 							{/* Selection indicator */}
 							{highlighted ? (
-								<Text color="cyan">{"❯ "}</Text>
+								<Text color={THEME.primary}>{"❯ "}</Text>
 							) : (
 								<Text>{"  "}</Text>
 							)}
-							
+
 							{/* Checkbox/Radio indicator */}
 							{type === "multi" ? (
 								selected ? (
-									<Text color="green">[✓] </Text>
+									<Text color={THEME.success}>{"[✓] "}</Text>
 								) : (
-									<Text color="gray">[ ] </Text>
+									<Text color={THEME.muted}>{"[ ] "}</Text>
 								)
 							) : selected ? (
-								<Text color="green">(●) </Text>
+								<Text color={THEME.success}>{"(●) "}</Text>
 							) : (
-								<Text color="gray">(○) </Text>
+								<Text color={THEME.muted}>{"(○) "}</Text>
 							)}
-							
+
 							{/* Label */}
 							{highlighted ? (
-								<Text color="cyan" bold>
+								<Text color={THEME.primary} bold>
 									{opt.label}
 								</Text>
 							) : selected ? (
-								<Text color="green">{opt.label}</Text>
+								<Text color={THEME.success}>{opt.label}</Text>
 							) : (
 								<Text>{opt.label}</Text>
 							)}
-							
+
 							{/* Badge */}
 							{opt.badge && (
 								<Text color={getBadgeColor(opt.badge)}>
@@ -105,9 +104,9 @@ export const OptionList: React.FC<OptionListProps> = ({
 								</Text>
 							)}
 						</Box>
-						
-						{/* Description on next line if exists */}
-						{opt.description && (
+
+						{/* Description on next line if highlighted */}
+						{opt.description && highlighted && (
 							<Box marginLeft={4}>
 								<Text dimColor wrap="end">
 									{opt.description}
@@ -124,15 +123,15 @@ export const OptionList: React.FC<OptionListProps> = ({
 function getBadgeColor(badge: string): string {
 	switch (badge) {
 		case "recommended":
-			return "green";
+			return THEME.success;
 		case "popular":
-			return "blue";
+			return THEME.accent;
 		case "experimental":
-			return "yellow";
+			return THEME.warning;
 		case "legacy":
-			return "gray";
+			return THEME.muted;
 		case "new":
-			return "magenta";
+			return THEME.highlight;
 		default:
 			return "white";
 	}
@@ -141,15 +140,15 @@ function getBadgeColor(badge: string): string {
 function formatBadge(badge: string): string {
 	switch (badge) {
 		case "recommended":
-			return "★ Recommended";
+			return "[Recommended]";
 		case "popular":
-			return "🔥 Popular";
+			return "[Popular]";
 		case "experimental":
-			return "🧪 Experimental";
+			return "[Experimental]";
 		case "legacy":
-			return "⚠ Legacy";
+			return "[Legacy]";
 		case "new":
-			return "✨ New";
+			return "[New]";
 		default:
 			return badge;
 	}

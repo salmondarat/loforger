@@ -68,6 +68,34 @@ export class TemplateLoader {
 		return templates;
 	}
 
+	async findMatchingTemplate(
+		answers: Record<string, unknown>,
+	): Promise<TemplateManifest | null> {
+		const templates = await this.listTemplates();
+		for (const t of templates) {
+			const manifest = await this.loadManifest(t.id);
+			if (!manifest) continue;
+
+			const matches = Object.entries(manifest.requiredAnswers).every(
+				([key, value]) => {
+					// Try multiple key formats to find a match:
+					// 1. As-is (e.g. "database")
+					// 2. Dots→underscores (e.g. "frontend.framework" → "frontend_framework")
+					// 3. First segment only (e.g. "database.primary" → "database")
+					const underscored = key.replace(/\./g, "_");
+					const firstSegment = key.split(".")[0];
+					return (
+						answers[key] === value ||
+						answers[underscored] === value ||
+						answers[firstSegment] === value
+					);
+				},
+			);
+			if (matches) return manifest;
+		}
+		return null;
+	}
+
 	async loadTemplateFile(
 		templateId: string,
 		filePath: string,

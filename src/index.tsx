@@ -1,11 +1,19 @@
 #!/usr/bin/env node
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 import { program } from "commander";
 import { createCommand } from "./cli/commands/create.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(
+	readFileSync(path.join(__dirname, "..", "package.json"), "utf-8"),
+);
 
 program
 	.name("loforger")
 	.description("Interactive CLI for scaffolding modern web projects")
-	.version("0.1.0");
+	.version(pkg.version);
 
 program
 	.command("create")
@@ -13,6 +21,7 @@ program
 	.option("-p, --preset <preset>", "Use a preset configuration")
 	.option("-m, --mode <mode>", "Project mode (mvp, production, extend)")
 	.option("--platform <platform>", "Target platform")
+	.option("-n, --name <name>", "Project name (used as output directory)")
 	.action(createCommand);
 
 program

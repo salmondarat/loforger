@@ -8,12 +8,15 @@ import type {
 	CompatibilityIssue,
 	QuestionPresentation,
 } from "../../types/index.js";
+import type { GenerationContext } from "../types.js";
+import { THEME } from "../theme.js";
 import ProgressBar from "./ProgressBar.js";
 import QuestionCard from "./QuestionCard.js";
 import SummaryView from "./SummaryView.js";
 
 interface AppProps {
 	initialAnswers?: Record<string, AnswerValue>;
+	generationCtx: GenerationContext;
 }
 
 // Hook to get terminal dimensions
@@ -41,7 +44,7 @@ function useTerminalSize() {
 	return size;
 }
 
-export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
+export const App: React.FC<AppProps> = ({ initialAnswers = {}, generationCtx }) => {
 	const { exit } = useApp();
 	const { columns } = useTerminalSize();
 	const [engine] = useState(() => new QuestionnaireEngine(initialAnswers));
@@ -112,9 +115,13 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 		if (compatEngine.hasBlockingErrors(engine.getAnswers())) {
 			return;
 		}
+		// Populate the generation context so createCommand can use it after exit
+		generationCtx.answers = { ...engine.getAnswers() };
+		generationCtx.projectName = (engine.getAnswers().project_name as string) || "my-app";
+		generationCtx.isConfirmed = true;
 		setIsComplete(true);
 		exit();
-	}, [engine, compatEngine, exit]);
+	}, [engine, compatEngine, exit, generationCtx]);
 
 	const handleEdit = useCallback(() => {
 		setShowSummary(false);
@@ -207,18 +214,21 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 
 	if (isComplete) {
 		return (
-			<Box flexDirection="column" alignItems="center" justifyContent="center" height={10}>
+			<Box flexDirection="column" alignItems="center" justifyContent="center" paddingY={2}>
 				<Box
 					borderStyle="round"
 					borderColor="green"
 					padding={1}
-					width={Math.min(50, maxWidth)}
+					width={Math.min(60, maxWidth)}
+					flexDirection="column"
 					alignItems="center"
-					justifyContent="center"
 				>
 					<Text color="green" bold>
-						✓ Configuration Complete!
+						{"✔ Configuration Complete!"}
 					</Text>
+					<Box marginTop={1}>
+						<Text dimColor>{"Generating project files..."}</Text>
+					</Box>
 				</Box>
 			</Box>
 		);
@@ -229,23 +239,23 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 			<Box flexDirection="column" alignItems="center" justifyContent="center" height={12}>
 				<Box
 					borderStyle="round"
-					borderColor="yellow"
+					borderColor={THEME.warning}
 					padding={1}
 					width={Math.min(50, maxWidth)}
 					flexDirection="column"
 					alignItems="center"
 				>
-					<Text color="yellow" bold>
-						⚠ Exit Confirmation
+					<Text color={THEME.warning} bold>
+						{"⚠ Exit Confirmation"}
 					</Text>
 					<Box marginY={1} flexDirection="column" alignItems="center">
-						<Text>Are you sure you want to exit?</Text>
-						<Text dimColor>All progress will be lost.</Text>
+						<Text>{"Are you sure you want to exit?"}</Text>
+						<Text dimColor>{"All progress will be lost."}</Text>
 					</Box>
 					<Box marginTop={1}>
 						<Text>
-							<Text bold color="green">Y</Text> - Yes, exit{"  "}
-							<Text bold color="red">N</Text> - No, continue
+							<Text bold color={THEME.success}>{"Y"}</Text>{" - Yes, exit  "}
+							<Text bold color={THEME.error}>{"N"}</Text>{" - No, continue"}
 						</Text>
 					</Box>
 				</Box>
@@ -278,24 +288,25 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 		<Box flexDirection="column" width={contentWidth}>
 			{/* Header */}
 			<Box marginBottom={1} flexDirection="column">
-				<Text color="cyan" bold>
-					◈ Loforger
+				<Text color={THEME.primary} bold>
+					{"◈ Loforger"}
 				</Text>
-				<Text dimColor>Project Scaffolding Tool</Text>
+				<Text dimColor>{"Project Scaffolding Tool"}</Text>
 			</Box>
 
 			{/* Progress */}
 			<ProgressBar
 				current={currentIndex + 1}
 				total={activeFlow.length}
+				group={currentQuestion.question.group}
 				width={maxWidth}
 			/>
 
 			{/* Selection Error */}
 			{selectionError && (
 				<Box marginY={1}>
-					<Text color="red" bold>
-						✗ {selectionError}
+					<Text color={THEME.error} bold>
+						{"✗ "}{selectionError}
 					</Text>
 				</Box>
 			)}
@@ -306,9 +317,9 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 					{issues.map((issue) => (
 						<Box key={issue.id}>
 							<Text
-								color={issue.severity === "error" ? "red" : "yellow"}
+								color={issue.severity === "error" ? THEME.error : THEME.warning}
 							>
-								{issue.severity === "error" ? "✗" : "⚠"} {issue.title}
+								{issue.severity === "error" ? "✗" : "⚠"}{" "}{issue.title}
 							</Text>
 						</Box>
 					))}
@@ -328,6 +339,7 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 					onBack={handleBack}
 					onContinue={handleAnswer}
 					maxWidth={maxWidth - 4}
+					stepInfo={{ current: currentIndex + 1, total: activeFlow.length }}
 				/>
 			</Box>
 
@@ -336,14 +348,14 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {} }) => {
 				<Text dimColor wrap="end">
 					{currentQuestion.question.type === "text" ? (
 						<>
-							Type answer, <Text bold color="green">Enter</Text> to continue,{" "}
-							<Text bold color="yellow">Esc</Text> to exit
+							{"Type answer, "}<Text bold color={THEME.success}>{"Enter"}</Text>{" to continue, "}
+							<Text bold color={THEME.warning}>{"Esc"}</Text>{" to exit"}
 						</>
 					) : (
 						<>
-							<Text bold color="blue">Space</Text> select,{" "}
-							<Text bold color="green">Enter</Text> continue,{" "}
-							<Text bold color="yellow">Esc</Text> back
+							<Text bold color={THEME.accent}>{"Space"}</Text>{" select, "}
+							<Text bold color={THEME.success}>{"Enter"}</Text>{" continue, "}
+							<Text bold color={THEME.warning}>{"Esc"}</Text>{" back"}
 						</>
 					)}
 				</Text>

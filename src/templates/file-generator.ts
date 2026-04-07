@@ -8,6 +8,7 @@ export interface GenerateOptions {
 	manifest: TemplateManifest;
 	answers: Record<string, unknown>;
 	outputDir: string;
+	onProgress?: (file: string, index: number, total: number) => void;
 }
 
 export class FileGenerator {
@@ -17,8 +18,9 @@ export class FileGenerator {
 		this.templatesDir = templatesDir || path.join(process.cwd(), "templates");
 	}
 
-	async generate(options: GenerateOptions): Promise<void> {
-		const { templateId, manifest, answers, outputDir } = options;
+	async generate(options: GenerateOptions): Promise<string[]> {
+		const { templateId, manifest, answers, outputDir, onProgress } = options;
+		const generatedFiles: string[] = [];
 
 		// Ensure output directory exists
 		await fs.ensureDir(outputDir);
@@ -34,7 +36,10 @@ export class FileGenerator {
 		Handlebars.registerHelper("eq", (a: unknown, b: unknown) => a === b);
 
 		// Generate each file
-		for (const fileDef of manifest.files) {
+		const totalFiles = manifest.files.length;
+		for (let i = 0; i < manifest.files.length; i++) {
+			const fileDef = manifest.files[i];
+
 			// Check condition if present
 			if (
 				fileDef.condition &&
@@ -48,7 +53,6 @@ export class FileGenerator {
 				fileDef.template,
 			);
 			if (!templateContent) {
-				console.warn(`Template file not found: ${fileDef.template}`);
 				continue;
 			}
 
@@ -60,10 +64,12 @@ export class FileGenerator {
 			const outputPath = path.join(outputDir, fileDef.path);
 			await fs.ensureDir(path.dirname(outputPath));
 			await fs.writeFile(outputPath, rendered);
-			console.log(`  Created: ${fileDef.path}`);
+			generatedFiles.push(fileDef.path);
+
+			onProgress?.(fileDef.path, i + 1, totalFiles);
 		}
 
-		console.log(`✓ Generated project in ${outputDir}`);
+		return generatedFiles;
 	}
 
 	private async loadTemplateFile(
