@@ -1,6 +1,6 @@
 {
   "name": "loforger",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Interactive CLI for scaffolding modern web projects",
   "type": "module",
   "main": "./dist/index.js",
