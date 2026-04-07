@@ -1,7 +1,7 @@
 [changelog]
 header = """# Changelog\n\nAll notable changes to Loforger will be documented in this file.\n"""
 body = """
-## [{{ version }}] - {{ date | date(format="%Y-%m-%d") }}
+## [{{ version }}] - {{ timestamp | date(format="%Y-%m-%d") }}
 
 {% for group, commits in commits | group_by(attribute="group") %}
 ### {{ group | upper_first }}

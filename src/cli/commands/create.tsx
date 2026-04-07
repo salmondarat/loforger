@@ -1,14 +1,14 @@
 import path from "node:path";
 import fs from "fs-extra";
 import { render } from "ink";
-import React from "react";
+import React from "react"; // biome-ignore lint/correctness/noUnusedImports: required for JSX runtime
 import type { AnswerValue } from "../../types/index.js";
 import { FileGenerator } from "../../templates/file-generator.js";
 import { TemplateLoader } from "../../templates/template-loader.js";
+import App from "../components/App.js";
 import type { GenerationContext } from "../types.js";
 import { Spinner } from "../utils/spinner.js";
 import { renderPostGenerationSummary } from "../utils/post-generation-summary.js";
-import App from "../components/App.js";
 
 interface CreateCommandOptions {
 	preset?: string;
