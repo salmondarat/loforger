@@ -1,7 +1,7 @@
 # Changelog
 
 All notable changes to Loforger will be documented in this file.
-## [] - 1970-01-01
+## [v0.2.7] - 2026-04-08
 
 
 ### Bug Fixes
@@ -12,6 +12,8 @@ All notable changes to Loforger will be documented in this file.
 
 
 ### Documentation
+
+- Update changelog [skip release]
 
 - Update changelog [skip release]
 
