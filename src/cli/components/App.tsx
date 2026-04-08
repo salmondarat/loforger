@@ -177,11 +177,7 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {}, generationCtx }) 
 					}
 				}
 			} else if (key.escape) {
-				if (isFirstQuestion) {
-					setShowExitConfirm(true);
-				} else {
-					handleBack();
-				}
+				setShowExitConfirm(true);
 			} else if (key.backspace || key.delete) {
 				const newValue = String(currentValueRef.current ?? "").slice(0, -1);
 				currentValueRef.current = newValue || null;
@@ -190,6 +186,22 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {}, generationCtx }) 
 				const newValue = String(currentValueRef.current ?? "") + input;
 				currentValueRef.current = newValue;
 				setCurrentValue(newValue);
+			}
+			return;
+		}
+
+		// Handle confirm input (final confirmation question)
+		if (currentQuestion?.question.type === "confirm") {
+			if (key.return) {
+				const value = currentValue ?? currentQuestion.resolvedDefault ?? true;
+				const result = engine.answer(currentQuestion.question.id, value);
+				if (result.ok) {
+					const newIssues = compatEngine.check(engine.getAnswers());
+					setIssues(newIssues);
+					setShowSummary(true);
+				}
+			} else if (key.escape) {
+				setShowExitConfirm(true);
 			}
 			return;
 		}
@@ -349,6 +361,11 @@ export const App: React.FC<AppProps> = ({ initialAnswers = {}, generationCtx }) 
 					{currentQuestion.question.type === "text" ? (
 						<>
 							{"Type answer, "}<Text bold color={THEME.success}>{"Enter"}</Text>{" to continue, "}
+							<Text bold color={THEME.warning}>{"Esc"}</Text>{" to exit"}
+						</>
+					) : currentQuestion.question.type === "confirm" ? (
+						<>
+							<Text bold color={THEME.success}>{"Enter"}</Text>{" to continue, "}
 							<Text bold color={THEME.warning}>{"Esc"}</Text>{" to exit"}
 						</>
 					) : (
