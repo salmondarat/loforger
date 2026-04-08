@@ -39,3 +39,6 @@ tests/
 
 # Documentation (not included in npm package)
 docs/
+
+# NPM
+.npmrc
